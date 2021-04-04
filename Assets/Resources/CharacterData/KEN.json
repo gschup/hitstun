@@ -1,8 +1,8 @@
 {
   "name": "KEN",
   "constants" : {
-    "WALK_FORWARD" : 35,
-    "WALK_BACKWARD" : -25
+    "WALK_FORWARD" : 2100,
+    "WALK_BACKWARD" : -1500
   },
   "animations": {
     "IDLE": {
@@ -45,6 +45,13 @@
       "distinctSprites": 4,
       "totalFrames": 4,
       "frameDuration": [1, 1, 1, 1],
+      "collisionBox": [-210, 260, 0, 400]
+    },
+    "JUMP_NEUTRAL": {
+      "animationName": "STAND_TO_CROUCH",
+      "distinctSprites": 1,
+      "totalFrames": 1,
+      "frameDuration": [1],
       "collisionBox": [-210, 260, 0, 400]
     }
   }

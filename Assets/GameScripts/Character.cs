@@ -206,8 +206,6 @@ public class Character {
     }
 
     public void UpdateCharacter(CharacterData data) {
-        velocity.x = 0;
-        velocity.y = 0;
         framesInState++;
 
         uint latestInput = GetInputsByRelativeIndex(0);
@@ -219,54 +217,93 @@ public class Character {
             case CharacterState.WALK_FORWARD:
             // WALK_BACKWARD STATE
             case CharacterState.WALK_BACKWARD:
+                if ((latestInput & (uint) Inputs.INPUT_UP) != 0) {
+                    setCharacterState(CharacterState.JUMP_NEUTRAL);
+                    velocity.x = 0;
+                    velocity.y = Constants.JUMP_VELOCITY;
+                    break;
+                }
                 if ((latestInput & (uint) Inputs.INPUT_DOWN) != 0) {
                     setCharacterState(CharacterState.STAND_TO_CROUCH);
-
-                } else if ((latestInput & (uint) Inputs.INPUT_FORWARD) != 0) {
+                    velocity.x = 0;
+                    velocity.y = 0;
+                    break;
+                } 
+                if ((latestInput & (uint) Inputs.INPUT_FORWARD) != 0) {
                     setCharacterState(CharacterState.WALK_FORWARD);
                     velocity.x = data.constants.WALK_FORWARD;
                     if (!facingRight) {
                         velocity.x *= -1;
                     }
-
-                } else if ((latestInput & (uint) Inputs.INPUT_BACK) != 0) {
+                    velocity.y = 0;
+                    break;
+                }
+                if ((latestInput & (uint) Inputs.INPUT_BACK) != 0) {
                     setCharacterState(CharacterState.WALK_BACKWARD);
                     velocity.x = data.constants.WALK_BACKWARD;
                     if (!facingRight) {
                         velocity.x *= -1;
                     }
-                } else {
-                    setCharacterState(CharacterState.IDLE);
+                    velocity.y = 0;
+                    break;
                 }
+                setCharacterState(CharacterState.IDLE);
+                velocity.x = 0;
+                velocity.y = 0;
                 break;
+
             // CROUCH_TO_STAND STATE - technically already standing
             case CharacterState.CROUCH_TO_STAND:
                 if (framesInState >= data.animations["CROUCH_TO_STAND"].totalFrames) {
                     setCharacterState(CharacterState.IDLE);
                 }
 
+                if ((latestInput & (uint) Inputs.INPUT_UP) != 0) {
+                    setCharacterState(CharacterState.JUMP_NEUTRAL);
+                    velocity.x = 0;
+                    velocity.y = Constants.JUMP_VELOCITY;
+                    break;
+                }
                 if ((latestInput & (uint) Inputs.INPUT_DOWN) != 0) {
                     setCharacterState(CharacterState.CROUCH);
-
-                } else if ((latestInput & (uint) Inputs.INPUT_FORWARD) != 0) {
+                    velocity.x = 0;
+                    velocity.y = 0;
+                    break;
+                } 
+                if ((latestInput & (uint) Inputs.INPUT_FORWARD) != 0) {
                     setCharacterState(CharacterState.WALK_FORWARD);
                     velocity.x = data.constants.WALK_FORWARD;
                     if (!facingRight) {
                         velocity.x *= -1;
                     }
-
-                } else if ((latestInput & (uint) Inputs.INPUT_BACK) != 0) {
+                    velocity.y = 0;
+                    break;
+                } 
+                if ((latestInput & (uint) Inputs.INPUT_BACK) != 0) {
                     setCharacterState(CharacterState.WALK_BACKWARD);
                     velocity.x = data.constants.WALK_BACKWARD;
                     if (facingRight) {
                         velocity.x *= -1;
                     }
+                    velocity.y = 0;
+                    break;
                 }
+                velocity.x = 0;
+                velocity.y = 0;
                 break;
             // CROUCH STATE
             case CharacterState.CROUCH:
+                if ((latestInput & (uint) Inputs.INPUT_UP) != 0) {
+                    setCharacterState(CharacterState.JUMP_NEUTRAL);
+                    velocity.x = 0;
+                    velocity.y = Constants.JUMP_VELOCITY;
+                    break;
+                }
                 if ((latestInput & (uint) Inputs.INPUT_DOWN) == 0) {
                     setCharacterState(CharacterState.CROUCH_TO_STAND);
+                    velocity.x = 0;
+                    velocity.y = 0;
+                    break;
                 }
                 break;
             // STAND_TO_CROUCH STATE - technically already crouching
@@ -274,9 +311,33 @@ public class Character {
                 if (framesInState >= data.animations["STAND_TO_CROUCH"].totalFrames) {
                     setCharacterState(CharacterState.CROUCH);
                 }
+                if ((latestInput & (uint) Inputs.INPUT_UP) != 0) {
+                    setCharacterState(CharacterState.JUMP_NEUTRAL);
+                    velocity.x = 0;
+                    velocity.y = Constants.JUMP_VELOCITY;
+                    break;
+                }
                 if ((latestInput & (uint) Inputs.INPUT_DOWN) == 0) {
                     setCharacterState(CharacterState.CROUCH_TO_STAND);
+                    velocity.x = 0;
+                    velocity.y = 0;
+                    break;
                 }
+                break;
+            // JUMP_NEUTRAL STATE
+            case CharacterState.JUMP_NEUTRAL:
+            // JUMP_FORWARD STATE
+            case CharacterState.JUMP_FORWARD:
+            // JUMP_BACKWARD STATE
+            case CharacterState.JUMP_BACKWARD:
+                velocity.x = 0;       
+                velocity.y += Constants.GRAVITY / Constants.FPS;
+                if (position.y <= 0) {
+                    setCharacterState(CharacterState.IDLE);
+                }
+                break;
+            default:
+                Debug.Log("Character State invalid:" + state.ToString());
                 break;
         }
     }

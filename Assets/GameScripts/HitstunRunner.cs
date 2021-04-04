@@ -9,6 +9,7 @@ using HitstunConstants;
 public class HitstunRunner : MonoBehaviour {
     // Unity Settings
     public bool localMode = true;
+    public bool showHitboxes = true;
     public CharacterName player1Character;
     public CharacterName player2Character;
 
@@ -121,6 +122,7 @@ public class HitstunRunner : MonoBehaviour {
         for (int i = 0; i < Constants.NUM_PLAYERS; ++i) {       
             characterViews[i] = Instantiate(characterView, transform);
             characterViews[i].LoadResources(characterDatas[i]);
+            characterViews[i].showHitboxes = showHitboxes;
         }
     }
 

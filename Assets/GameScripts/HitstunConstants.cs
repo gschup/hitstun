@@ -7,6 +7,7 @@ namespace HitstunConstants {
         public const int FRAME_DELAY = 2;
         public const int NUM_PLAYERS = 2;
         public const int INPUT_BUFFER_SIZE = 60;
+        public const int FPS = 60;
 
         // Camera
         public const float SCALE = 1000.0f;
@@ -18,6 +19,12 @@ namespace HitstunConstants {
         public const int BOUNDS_HEIGHT = 4000;
         public const int INITIAL_CHARACTER_DISPLACEMENT = 1000;
         public const int MAX_CHARACTER_DISTANCE = 3500;
+        public const int MAX_JUMP_HEIGHT = 1000;
+        public const int JUMP_TIME_TO_PEAK_INV = 2;
+        // DERIVED GRAVITY
+        public const int GRAVITY = -(2*MAX_JUMP_HEIGHT) * (JUMP_TIME_TO_PEAK_INV * JUMP_TIME_TO_PEAK_INV);
+        // DERIVED JUMP VELOCITY
+        public const int JUMP_VELOCITY = 2*MAX_JUMP_HEIGHT * JUMP_TIME_TO_PEAK_INV;
     }
 
     public enum KeyPress : uint {
@@ -69,7 +76,10 @@ namespace HitstunConstants {
         WALK_FORWARD = 2,
         WALK_BACKWARD = 3,
         STAND_TO_CROUCH = 4,
-        CROUCH_TO_STAND = 5
+        CROUCH_TO_STAND = 5,
+        JUMP_NEUTRAL = 6,
+        JUMP_FORWARD = 7,
+        JUMP_BACKWARD = 8
     }
 }
 

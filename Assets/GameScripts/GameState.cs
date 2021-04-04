@@ -80,8 +80,8 @@ public class GameState {
 
         // apply velocity and change facing direction
         for (int i = 0; i < Constants.NUM_PLAYERS; i++) {
-            characters[i].position.x += characters[i].velocity.x;
-            characters[i].position.y += characters[i].velocity.y;
+            characters[i].position.x += characters[i].velocity.x / Constants.FPS;
+            characters[i].position.y += characters[i].velocity.y / Constants.FPS;
 
             // update facing direction
             bool newFacing = (characters[i].position.x < characters[1-i].position.x) ? true : false;

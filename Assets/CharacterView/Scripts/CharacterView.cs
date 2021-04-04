@@ -11,6 +11,7 @@ public class CharacterView : MonoBehaviour {
     public float zDistance = 2.0f;
     public float shadowSize = 0.5f;
     public float shadowOffset = -0.03f;
+    public bool showHitboxes { get; set; }
     private CharacterData data;
     private Dictionary<string, Sprite[]> sprites;
     private HitboxView collisionBox;
@@ -44,7 +45,7 @@ public class CharacterView : MonoBehaviour {
                 break;
             }
         }
-        spriteRenderer.sprite = sprites[currentAnimation.animationName][spriteIndex];
+        spriteRenderer.sprite = sprites[currentAnimation.animationName][spriteIndex % currentAnimation.totalFrames];
 
         // x and y position
         float viewX = ((character.position.x - Constants.BOUNDS_WIDTH/2) / Constants.SCALE);
@@ -54,14 +55,6 @@ public class CharacterView : MonoBehaviour {
         float maxY = Constants.BOUNDS_HEIGHT / Constants.SCALE;
         float normY = viewY / maxY;
         shadowProjector.orthographicSize = shadowSize * (1.0f-normY) * (1.0f-normY);
-
-        // hitboxes
-        if (collisionBox is null) {
-            collisionBox = Instantiate(hitboxPrefab, transform);
-            collisionBox.spriteRenderer.color = new Color(0f,1f,0f,.5f);
-        }
-        //Vector3 hitboxPos = collisionBox.transform.position;
-        collisionBox.setRect(viewX, viewY, zDistance, character.facingRight, currentAnimation.collisionBox);
 
         // sprite facing direction
         spriteRenderer.flipX = character.facingRight;
@@ -74,5 +67,14 @@ public class CharacterView : MonoBehaviour {
         } else {
             spriteRenderer.sortingLayerName = "PLAYER_BOTTOM";
         }
+
+        // hitboxes
+        if (showHitboxes) {
+            if (collisionBox is null) {
+                collisionBox = Instantiate(hitboxPrefab, transform);
+                collisionBox.spriteRenderer.color = new Color(0f,1f,0f,.5f);
+            }
+            collisionBox.setRect(viewX, viewY, zDistance, character.facingRight, currentAnimation.collisionBox);
+        }  
     }
 }
