@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: c2375dcb41b39f94e87bd548bec8460c
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - model: {instanceID: 0}
+  - standing: {fileID: 6893204006806976527, guid: ef8204161cc04da429567edb5479f7e6, type: 3}
+  - crouching: {fileID: 6941424055812253072, guid: 5d886d552075e9d4c84d93417ac5e191, type: 3}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

@@ -1,0 +1,51 @@
+{
+  "name": "KEN",
+  "constants" : {
+    "WALK_FORWARD" : 35,
+    "WALK_BACKWARD" : -25
+  },
+  "animations": {
+    "IDLE": {
+      "animationName": "IDLE",
+      "distinctSprites": 10,
+      "totalFrames": 34,
+      "frameDuration": [3, 3, 4, 4, 4, 4, 3, 3, 3, 3],
+      "collisionBox": [-200, 250, 0, 800]
+    },
+    "CROUCH": {
+      "animationName": "CROUCH",
+      "distinctSprites": 4,
+      "totalFrames": 36,
+      "frameDuration": [9, 9, 9, 9],
+      "collisionBox": [-210, 260, 0, 400]
+    },
+    "WALK_BACKWARD": {
+      "animationName": "WALK_BACKWARD",
+      "distinctSprites": 11,
+      "totalFrames": 33,
+      "frameDuration": [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+      "collisionBox": [-200, 250, 0, 800]
+    },
+    "WALK_FORWARD": {
+      "animationName": "WALK_FORWARD",
+      "distinctSprites": 11,
+      "totalFrames": 33,
+      "frameDuration": [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+      "collisionBox": [-200, 250, 0, 800]
+    },
+    "CROUCH_TO_STAND": {
+      "animationName": "CROUCH_TO_STAND",
+      "distinctSprites": 4,
+      "totalFrames": 4,
+      "frameDuration": [1, 1, 1, 1],
+      "collisionBox": [-200, 250, 0, 800]
+    },
+    "STAND_TO_CROUCH": {
+      "animationName": "STAND_TO_CROUCH",
+      "distinctSprites": 4,
+      "totalFrames": 4,
+      "frameDuration": [1, 1, 1, 1],
+      "collisionBox": [-210, 260, 0, 400]
+    }
+  }
+}
