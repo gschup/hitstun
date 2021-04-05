@@ -78,17 +78,10 @@ public class GameState {
             characters[i].UpdateCharacter(characterDatas[i]);
         }
 
-        // apply velocity and change facing direction
+        // apply velocity
         for (int i = 0; i < Constants.NUM_PLAYERS; i++) {
             characters[i].position.x += characters[i].velocity.x / Constants.FPS;
-            characters[i].position.y += characters[i].velocity.y / Constants.FPS;
-
-            // update facing direction
-            bool newFacing = (characters[i].position.x < characters[1-i].position.x) ? true : false;
-            if (newFacing != characters[i].facingRight) {
-                characters[i].FlipInputBufferInputs();
-            }
-            characters[i].facingRight = newFacing;
+            characters[i].position.y += characters[i].velocity.y / Constants.FPS;            
         }
 
         for (int i = 0; i < Constants.NUM_PLAYERS; i++) {
@@ -115,13 +108,47 @@ public class GameState {
 
         Box overlap;
         if (box1.getOverlap(box2, out overlap)) {
+            bool resolveLeft = false;
+            // resolve by x position
             if (characters[0].position.x < characters[1].position.x) {
-                characters[0].position.x -= (overlap.getWidth() / 2)+1;
-                characters[1].position.x += (overlap.getWidth() / 2)+1;
+                resolveLeft = true;
+            } else if (characters[0].position.x > characters[1].position.x){
+                resolveLeft = false;
             } else {
-                characters[0].position.x += (overlap.getWidth() / 2)+1;
-                characters[0].position.x -= (overlap.getWidth() / 2)+1;
+                // if tied, resolve by x velocity
+                if (characters[0].velocity.x < characters[1].velocity.x) {
+                    resolveLeft = true;
+                } else if (characters[0].velocity.x > characters[1].velocity.x) {
+                    resolveLeft = false;
+                } else {
+                    // if tied, resolve by y position
+                    if (characters[0].position.y < characters[1].position.y) {
+                        resolveLeft = true;
+                    } else if (characters[0].position.y > characters[1].position.y) {
+                        resolveLeft = false;
+                    } else {
+                        // it is getting awkward
+                        Debug.Log("collision box resolution tied");
+                        resolveLeft = true;
+                    }
+                }
             }
+            // apply collision resolution
+            int pushDistance = (overlap.getWidth() / 2) + 1;
+            characters[0].position.x += resolveLeft ? -pushDistance : pushDistance;
+            characters[1].position.x += resolveLeft ? pushDistance : -pushDistance;
+        }
+
+        // update facing direction
+        for (int i=0; i<Constants.NUM_PLAYERS; i++) {
+            if (characters[i].IsAirborne()) {
+                continue;
+            }
+            bool newFacing = (characters[i].position.x < characters[1-i].position.x) ? true : false;
+            if (newFacing != characters[i].facingRight) {
+                characters[i].FlipInputBufferInputs();
+            }
+            characters[i].facingRight = newFacing;
         }
     }
 }

@@ -25,4 +25,5 @@ public class Animation {
 public class Params {
     public int WALK_FORWARD;
     public int WALK_BACKWARD;
+    public int JUMP_VELOCITY_X;
 }

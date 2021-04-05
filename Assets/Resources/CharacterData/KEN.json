@@ -2,7 +2,8 @@
   "name": "KEN",
   "constants" : {
     "WALK_FORWARD" : 2100,
-    "WALK_BACKWARD" : -1500
+    "WALK_BACKWARD" : -1500,
+    "JUMP_VELOCITY_X" : 2200
   },
   "animations": {
     "IDLE": {
@@ -10,49 +11,77 @@
       "distinctSprites": 10,
       "totalFrames": 34,
       "frameDuration": [3, 3, 4, 4, 4, 4, 3, 3, 3, 3],
-      "collisionBox": [-200, 250, 0, 800]
+      "collisionBox": [-250, 250, 0, 800]
     },
     "CROUCH": {
       "animationName": "CROUCH",
       "distinctSprites": 4,
       "totalFrames": 36,
       "frameDuration": [9, 9, 9, 9],
-      "collisionBox": [-210, 260, 0, 400]
+      "collisionBox": [-260, 260, 0, 400]
     },
     "WALK_BACKWARD": {
       "animationName": "WALK_BACKWARD",
       "distinctSprites": 11,
       "totalFrames": 33,
-      "frameDuration": [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
-      "collisionBox": [-200, 250, 0, 800]
+      "frameDuration": [3,3,3,3,3,3,3,3,3,3,3],
+      "collisionBox": [-250, 250, 0, 800]
     },
     "WALK_FORWARD": {
       "animationName": "WALK_FORWARD",
       "distinctSprites": 11,
       "totalFrames": 33,
-      "frameDuration": [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
-      "collisionBox": [-200, 250, 0, 800]
+      "frameDuration": [3,3,3,3,3,3,3,3,3,3,3],
+      "collisionBox": [-250, 250, 0, 800]
     },
     "CROUCH_TO_STAND": {
       "animationName": "CROUCH_TO_STAND",
       "distinctSprites": 4,
       "totalFrames": 4,
-      "frameDuration": [1, 1, 1, 1],
-      "collisionBox": [-200, 250, 0, 800]
+      "frameDuration": [1,1,1,1],
+      "collisionBox": [-250, 250, 0, 800]
     },
     "STAND_TO_CROUCH": {
       "animationName": "STAND_TO_CROUCH",
       "distinctSprites": 4,
       "totalFrames": 4,
-      "frameDuration": [1, 1, 1, 1],
-      "collisionBox": [-210, 260, 0, 400]
+      "frameDuration": [1,1,1,1],
+      "collisionBox": [-250, 250, 0, 400]
     },
     "JUMP_NEUTRAL": {
-      "animationName": "STAND_TO_CROUCH",
-      "distinctSprites": 1,
-      "totalFrames": 1,
-      "frameDuration": [1],
-      "collisionBox": [-210, 260, 0, 400]
+      "animationName": "JUMP_NEUTRAL",
+      "distinctSprites": 12,
+      "totalFrames": 38,
+      "frameDuration": [4,3,3,3,3,3,3,3,3,3,3,3],
+      "collisionBox": [-250, 250, 400, 1000]
+    },
+    "JUMP_FORWARD": {
+      "animationName": "JUMP_FORWARD",
+      "distinctSprites": 14,
+      "totalFrames": 38,
+      "frameDuration": [3,3,3,3,3,3,2,2,2,2,3,3,3,3],
+      "collisionBox": [-250, 250, 400, 900]
+    },
+    "JUMP_BACKWARD": {
+      "animationName": "JUMP_BACKWARD",
+      "distinctSprites": 14,
+      "totalFrames": 38,
+      "frameDuration": [3,3,3,3,3,3,2,2,2,2,3,3,3,3],
+      "collisionBox": [-250, 250, 400, 900]
+    },
+    "DASH_BACKWARD": {
+      "animationName": "DASH_BACKWARD",
+      "distinctSprites": 6,
+      "totalFrames": 16,
+      "frameDuration": [2,2,2,2,2,6],
+      "collisionBox": [-250, 250, 0, 800]
+    },
+    "DASH_FORWARD": {
+      "animationName": "DASH_FORWARD",
+      "distinctSprites": 7,
+      "totalFrames": 17,
+      "frameDuration": [1,4,4,2,4,2],
+      "collisionBox": [-250, 250, 0, 800]
     }
   }
 }

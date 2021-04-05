@@ -19,12 +19,12 @@ namespace HitstunConstants {
         public const int BOUNDS_HEIGHT = 4000;
         public const int INITIAL_CHARACTER_DISPLACEMENT = 1000;
         public const int MAX_CHARACTER_DISTANCE = 3500;
-        public const int MAX_JUMP_HEIGHT = 1000;
-        public const int JUMP_TIME_TO_PEAK_INV = 2;
-        // DERIVED GRAVITY
-        public const int GRAVITY = -(2*MAX_JUMP_HEIGHT) * (JUMP_TIME_TO_PEAK_INV * JUMP_TIME_TO_PEAK_INV);
-        // DERIVED JUMP VELOCITY
-        public const int JUMP_VELOCITY = 2*MAX_JUMP_HEIGHT * JUMP_TIME_TO_PEAK_INV;
+
+        // Jump parameters
+        public const int JUMP_HEIGHT = 1000;
+        public const float TIME_TO_PEAK = 0.3f;
+        public const int GRAVITY = (int) (-(2*JUMP_HEIGHT) / (TIME_TO_PEAK * TIME_TO_PEAK));
+        public const int JUMP_VELOCITY_Y = (int) (2*JUMP_HEIGHT / TIME_TO_PEAK);
     }
 
     public enum KeyPress : uint {

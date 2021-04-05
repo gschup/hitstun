@@ -35,4 +35,8 @@ public class Box
     public int getHeight() {
         return yMax - yMin;
     }
+
+    public override string ToString() {
+        return "Box: " + xMin.ToString() + ", " + xMax.ToString() + ", " + yMin.ToString() + ", " + yMax.ToString();
+    }
 }

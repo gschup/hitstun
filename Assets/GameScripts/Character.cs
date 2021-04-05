@@ -72,29 +72,15 @@ public class Character {
 
     public void AddInputsToBuffer(uint inputs) {
         uint sanitizedInputs = inputs;
-        // if up+down, keep only the one that was pressed previously. if none, register none
+        // if up+down, register none of them
         if ((inputs & (uint) KeyPress.KEY_DOWN) != 0 && (inputs & (uint) KeyPress.KEY_UP) != 0) {
-            uint lastInputs = GetInputsByRelativeIndex(0);
-            if ((lastInputs & (uint) KeyPress.KEY_DOWN) != 0) {
-                sanitizedInputs &= ~ (uint) KeyPress.KEY_UP;
-            } else if ((lastInputs & (uint) KeyPress.KEY_UP) != 0) {
-                sanitizedInputs &= ~ (uint) KeyPress.KEY_DOWN;
-            } else {
-                sanitizedInputs &= ~ (uint) KeyPress.KEY_UP;
-                sanitizedInputs &= ~ (uint) KeyPress.KEY_DOWN;
-            }
+            sanitizedInputs &= ~ (uint) KeyPress.KEY_UP;
+            sanitizedInputs &= ~ (uint) KeyPress.KEY_DOWN;
         }
-        //if left+right, keep only the one that was pressed previously. if none, register none
+        //if left+right, register none of them
         if ((inputs & (uint) KeyPress.KEY_LEFT) != 0 && (inputs & (uint) KeyPress.KEY_RIGHT) != 0) {
-            uint lastInputs = GetInputsByRelativeIndex(0);
-            if ((lastInputs & (uint) KeyPress.KEY_LEFT) != 0) {
-                sanitizedInputs &= ~ (uint) KeyPress.KEY_RIGHT;
-            } else if ((lastInputs & (uint) KeyPress.KEY_RIGHT) != 0) {
-                sanitizedInputs &= ~ (uint) KeyPress.KEY_LEFT;
-            } else {
-                sanitizedInputs &= ~ (uint) KeyPress.KEY_LEFT;
-                sanitizedInputs &= ~ (uint) KeyPress.KEY_RIGHT;
-            }
+            sanitizedInputs &= ~ (uint) KeyPress.KEY_LEFT;
+            sanitizedInputs &= ~ (uint) KeyPress.KEY_RIGHT;
         }
 
         // convert keypresses to inputs (left/right to back/forward, depending on facing direction)
@@ -205,11 +191,12 @@ public class Character {
         return box;
     }
 
+    public bool IsAirborne() {
+        return state == CharacterState.JUMP_NEUTRAL || state == CharacterState.JUMP_FORWARD || state == CharacterState.JUMP_BACKWARD;
+    }
+
     public void UpdateCharacter(CharacterData data) {
         framesInState++;
-
-        uint latestInput = GetInputsByRelativeIndex(0);
-
         switch (state) {
             // IDLE STATE
             case CharacterState.IDLE:
@@ -217,36 +204,16 @@ public class Character {
             case CharacterState.WALK_FORWARD:
             // WALK_BACKWARD STATE
             case CharacterState.WALK_BACKWARD:
-                if ((latestInput & (uint) Inputs.INPUT_UP) != 0) {
-                    setCharacterState(CharacterState.JUMP_NEUTRAL);
-                    velocity.x = 0;
-                    velocity.y = Constants.JUMP_VELOCITY;
+                if (checkJump(data)) {
                     break;
                 }
-                if ((latestInput & (uint) Inputs.INPUT_DOWN) != 0) {
-                    setCharacterState(CharacterState.STAND_TO_CROUCH);
-                    velocity.x = 0;
-                    velocity.y = 0;
-                    break;
-                } 
-                if ((latestInput & (uint) Inputs.INPUT_FORWARD) != 0) {
-                    setCharacterState(CharacterState.WALK_FORWARD);
-                    velocity.x = data.constants.WALK_FORWARD;
-                    if (!facingRight) {
-                        velocity.x *= -1;
-                    }
-                    velocity.y = 0;
+                if (checkCrouch(data)) {
                     break;
                 }
-                if ((latestInput & (uint) Inputs.INPUT_BACK) != 0) {
-                    setCharacterState(CharacterState.WALK_BACKWARD);
-                    velocity.x = data.constants.WALK_BACKWARD;
-                    if (!facingRight) {
-                        velocity.x *= -1;
-                    }
-                    velocity.y = 0;
+                if (checkWalk(data)) {
                     break;
                 }
+                // default idle
                 setCharacterState(CharacterState.IDLE);
                 velocity.x = 0;
                 velocity.y = 0;
@@ -254,75 +221,48 @@ public class Character {
 
             // CROUCH_TO_STAND STATE - technically already standing
             case CharacterState.CROUCH_TO_STAND:
+                if (checkJump(data)) {
+                    break;
+                }
+                if (checkCrouch(data)) {
+                    break;
+                }
+                if (checkWalk(data)) {
+                    break;
+                }
+                // default stay in state
                 if (framesInState >= data.animations["CROUCH_TO_STAND"].totalFrames) {
                     setCharacterState(CharacterState.IDLE);
-                }
-
-                if ((latestInput & (uint) Inputs.INPUT_UP) != 0) {
-                    setCharacterState(CharacterState.JUMP_NEUTRAL);
-                    velocity.x = 0;
-                    velocity.y = Constants.JUMP_VELOCITY;
-                    break;
-                }
-                if ((latestInput & (uint) Inputs.INPUT_DOWN) != 0) {
-                    setCharacterState(CharacterState.CROUCH);
-                    velocity.x = 0;
-                    velocity.y = 0;
-                    break;
-                } 
-                if ((latestInput & (uint) Inputs.INPUT_FORWARD) != 0) {
-                    setCharacterState(CharacterState.WALK_FORWARD);
-                    velocity.x = data.constants.WALK_FORWARD;
-                    if (!facingRight) {
-                        velocity.x *= -1;
-                    }
-                    velocity.y = 0;
-                    break;
-                } 
-                if ((latestInput & (uint) Inputs.INPUT_BACK) != 0) {
-                    setCharacterState(CharacterState.WALK_BACKWARD);
-                    velocity.x = data.constants.WALK_BACKWARD;
-                    if (facingRight) {
-                        velocity.x *= -1;
-                    }
-                    velocity.y = 0;
-                    break;
                 }
                 velocity.x = 0;
                 velocity.y = 0;
                 break;
             // CROUCH STATE
             case CharacterState.CROUCH:
-                if ((latestInput & (uint) Inputs.INPUT_UP) != 0) {
-                    setCharacterState(CharacterState.JUMP_NEUTRAL);
-                    velocity.x = 0;
-                    velocity.y = Constants.JUMP_VELOCITY;
+                if (checkJump(data)) {
                     break;
                 }
-                if ((latestInput & (uint) Inputs.INPUT_DOWN) == 0) {
-                    setCharacterState(CharacterState.CROUCH_TO_STAND);
-                    velocity.x = 0;
-                    velocity.y = 0;
+                if (checkStand(data)) {
                     break;
                 }
+                // default crouch
+                velocity.x = 0;
+                velocity.y = 0;
                 break;
             // STAND_TO_CROUCH STATE - technically already crouching
             case CharacterState.STAND_TO_CROUCH:
+                if (checkJump(data)) {
+                    break;
+                }
+                if (checkStand(data)) {
+                    break;
+                }
+                // default stay in state
                 if (framesInState >= data.animations["STAND_TO_CROUCH"].totalFrames) {
                     setCharacterState(CharacterState.CROUCH);
                 }
-                if ((latestInput & (uint) Inputs.INPUT_UP) != 0) {
-                    setCharacterState(CharacterState.JUMP_NEUTRAL);
-                    velocity.x = 0;
-                    velocity.y = Constants.JUMP_VELOCITY;
-                    break;
-                }
-                if ((latestInput & (uint) Inputs.INPUT_DOWN) == 0) {
-                    setCharacterState(CharacterState.CROUCH_TO_STAND);
-                    velocity.x = 0;
-                    velocity.y = 0;
-                    break;
-                }
+                velocity.x = 0;
+                velocity.y = 0;
                 break;
             // JUMP_NEUTRAL STATE
             case CharacterState.JUMP_NEUTRAL:
@@ -330,7 +270,7 @@ public class Character {
             case CharacterState.JUMP_FORWARD:
             // JUMP_BACKWARD STATE
             case CharacterState.JUMP_BACKWARD:
-                velocity.x = 0;       
+                velocity.x = velocity.x;       
                 velocity.y += Constants.GRAVITY / Constants.FPS;
                 if (position.y <= 0) {
                     setCharacterState(CharacterState.IDLE);
@@ -340,5 +280,79 @@ public class Character {
                 Debug.Log("Character State invalid:" + state.ToString());
                 break;
         }
+    }
+
+    public bool checkJump(CharacterData data) {
+        uint latestInput = GetInputsByRelativeIndex(0);
+        if ((latestInput & (uint) Inputs.INPUT_UP) != 0 && (latestInput & (uint) Inputs.INPUT_FORWARD) != 0) {
+            setCharacterState(CharacterState.JUMP_FORWARD);
+            velocity.x = data.constants.JUMP_VELOCITY_X;
+            velocity.y = Constants.JUMP_VELOCITY_Y;
+            if (!facingRight) {
+                velocity.x *= -1;
+            }
+            return true;
+        }
+        if ((latestInput & (uint) Inputs.INPUT_UP) != 0 && (latestInput & (uint) Inputs.INPUT_BACK) != 0) {
+            setCharacterState(CharacterState.JUMP_BACKWARD);
+            velocity.x = -data.constants.JUMP_VELOCITY_X;
+            velocity.y = Constants.JUMP_VELOCITY_Y;
+            if (!facingRight) {
+                velocity.x *= -1;
+            }
+            return true;
+        }
+        if ((latestInput & (uint) Inputs.INPUT_UP) != 0) {
+            setCharacterState(CharacterState.JUMP_NEUTRAL);
+            velocity.x = 0;
+            velocity.y = Constants.JUMP_VELOCITY_Y;
+            return true;
+        }
+        return false;
+    }
+
+    public bool checkCrouch(CharacterData data) {
+        uint latestInput = GetInputsByRelativeIndex(0);
+        if ((latestInput & (uint) Inputs.INPUT_DOWN) != 0) {
+            setCharacterState(CharacterState.STAND_TO_CROUCH);
+            velocity.x = 0;
+            velocity.y = 0;
+            return true;
+        }
+        return false;
+    }
+
+    public bool checkStand(CharacterData data) {
+        uint latestInput = GetInputsByRelativeIndex(0);
+        if ((latestInput & (uint) Inputs.INPUT_DOWN) == 0) {
+            setCharacterState(CharacterState.CROUCH_TO_STAND);
+            velocity.x = 0;
+            velocity.y = 0;
+            return true;
+        }
+        return false;
+    }
+
+    public bool checkWalk(CharacterData data) {
+        uint latestInput = GetInputsByRelativeIndex(0);
+        if ((latestInput & (uint) Inputs.INPUT_FORWARD) != 0) {
+            setCharacterState(CharacterState.WALK_FORWARD);
+            velocity.x = data.constants.WALK_FORWARD;
+            if (!facingRight) {
+                velocity.x *= -1;
+            }
+            velocity.y = 0;
+            return true;
+        }
+        if ((latestInput & (uint) Inputs.INPUT_BACK) != 0) {
+            setCharacterState(CharacterState.WALK_BACKWARD);
+            velocity.x = data.constants.WALK_BACKWARD;
+            if (!facingRight) {
+                velocity.x *= -1;
+            }
+            velocity.y = 0;
+            return true;
+        }
+        return false;
     }
 }
