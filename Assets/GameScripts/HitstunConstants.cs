@@ -20,6 +20,12 @@ namespace HitstunConstants {
         public const int INITIAL_CHARACTER_DISPLACEMENT = 1000;
         public const int MAX_CHARACTER_DISTANCE = 3500;
 
+        // Leniencies
+        public const int LENIENCY_DASH = 5;
+        public const int LENIENCY_QF = 10;
+        public const int LENIENCY_DP = 15;
+        public const int LENIENCY_DOUBLE_QF = 20;
+
         // Jump parameters
         public const int JUMP_HEIGHT = 1000;
         public const float TIME_TO_PEAK = 0.25f;
@@ -29,8 +35,18 @@ namespace HitstunConstants {
 
     public static class Motions {
         public static readonly uint[] DASH_FORWARD = {(uint)Inputs.INPUT_FORWARD, (uint)Inputs.INPUT_NEUTRAL, (uint)Inputs.INPUT_FORWARD};
-        public static readonly uint[] DASH_BACKWARD = {(uint)Inputs.INPUT_BACKWARD, (uint)Inputs.INPUT_NEUTRAL, (uint)Inputs.INPUT_BACKWARD};
+        public static readonly uint[] DASH_BACKWARD = {(uint)Inputs.INPUT_BACK, (uint)Inputs.INPUT_NEUTRAL, (uint)Inputs.INPUT_BACK};
         public static readonly uint[] QCF = {(uint)Inputs.INPUT_DOWN, (uint)Inputs.INPUT_DOWN | (uint)Inputs.INPUT_FORWARD, (uint)Inputs.INPUT_FORWARD};
+        public static readonly uint[] QCB = {(uint)Inputs.INPUT_DOWN, (uint)Inputs.INPUT_DOWN | (uint)Inputs.INPUT_BACK, (uint)Inputs.INPUT_BACK};
+        public static readonly uint[] DOUBLE_QCF = {(uint)Inputs.INPUT_DOWN, (uint)Inputs.INPUT_DOWN | (uint)Inputs.INPUT_FORWARD, (uint)Inputs.INPUT_FORWARD, (uint)Inputs.INPUT_DOWN, (uint)Inputs.INPUT_DOWN | (uint)Inputs.INPUT_FORWARD, (uint)Inputs.INPUT_FORWARD};
+        public static readonly uint[] DP = {(uint)Inputs.INPUT_FORWARD, (uint)Inputs.INPUT_DOWN, (uint)Inputs.INPUT_DOWN | (uint)Inputs.INPUT_FORWARD};
+
+        public static bool isMotionInput(Inputs input) {
+            return (uint) input < 16;
+        }
+        public static bool isMotionInput(uint input) {
+            return input < 16;
+        }
     }
 
     public enum KeyPress : uint {
@@ -48,7 +64,7 @@ namespace HitstunConstants {
 
     public enum Inputs : uint {
         INPUT_NEUTRAL = 0,
-        INPUT_BACKWARD = (1 << 0),
+        INPUT_BACK = (1 << 0),
         INPUT_FORWARD = (1 << 1),
         INPUT_UP = (1 << 2),
         INPUT_DOWN = (1 << 3),
