@@ -18,6 +18,8 @@ public class Animation {
     public int distinctSprites;
     public int totalFrames;
     public int[] frameDuration;
+    public int[] dx;
+    public int[] dy;
     public int[] collisionBox;
 }
 

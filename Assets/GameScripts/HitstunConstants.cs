@@ -22,9 +22,15 @@ namespace HitstunConstants {
 
         // Jump parameters
         public const int JUMP_HEIGHT = 1000;
-        public const float TIME_TO_PEAK = 0.3f;
+        public const float TIME_TO_PEAK = 0.25f;
         public const int GRAVITY = (int) (-(2*JUMP_HEIGHT) / (TIME_TO_PEAK * TIME_TO_PEAK));
         public const int JUMP_VELOCITY_Y = (int) (2*JUMP_HEIGHT / TIME_TO_PEAK);
+    }
+
+    public static class Motions {
+        public static readonly uint[] DASH_FORWARD = {(uint)Inputs.INPUT_FORWARD, (uint)Inputs.INPUT_NEUTRAL, (uint)Inputs.INPUT_FORWARD};
+        public static readonly uint[] DASH_BACKWARD = {(uint)Inputs.INPUT_BACKWARD, (uint)Inputs.INPUT_NEUTRAL, (uint)Inputs.INPUT_BACKWARD};
+        public static readonly uint[] QCF = {(uint)Inputs.INPUT_DOWN, (uint)Inputs.INPUT_DOWN | (uint)Inputs.INPUT_FORWARD, (uint)Inputs.INPUT_FORWARD};
     }
 
     public enum KeyPress : uint {
@@ -41,7 +47,8 @@ namespace HitstunConstants {
     }
 
     public enum Inputs : uint {
-        INPUT_BACK = (1 << 0),
+        INPUT_NEUTRAL = 0,
+        INPUT_BACKWARD = (1 << 0),
         INPUT_FORWARD = (1 << 1),
         INPUT_UP = (1 << 2),
         INPUT_DOWN = (1 << 3),
@@ -79,7 +86,9 @@ namespace HitstunConstants {
         CROUCH_TO_STAND = 5,
         JUMP_NEUTRAL = 6,
         JUMP_FORWARD = 7,
-        JUMP_BACKWARD = 8
+        JUMP_BACKWARD = 8,
+        DASH_FORWARD = 9,
+        DASH_BACKWARD = 10
     }
 }
 
