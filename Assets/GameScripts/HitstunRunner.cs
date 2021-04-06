@@ -65,6 +65,9 @@ public class HitstunRunner : MonoBehaviour {
     }
 
     void Update() {
+        if (UnityEngine.Input.GetKey(UnityEngine.KeyCode.Escape)) {
+            Application.Quit();
+        }
         if (Running) {
             var now = Time.time;
             var extraMs = Mathf.Max(0, (int)((next - now) * 1000f) - 1);
@@ -76,11 +79,11 @@ public class HitstunRunner : MonoBehaviour {
                 if (localMode) {
                     //long before = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
                     LocalSession.RunFrame();
-                    if (UnityEngine.Input.GetKey(UnityEngine.KeyCode.O)) {
+                    if (UnityEngine.Input.GetKey(UnityEngine.KeyCode.F1)) {
                         Debug.Log("SAVE");
                         TestSave();
                     }
-                    if (UnityEngine.Input.GetKey(UnityEngine.KeyCode.P)) {
+                    if (UnityEngine.Input.GetKey(UnityEngine.KeyCode.F2)) {
                         Debug.Log("LOAD");
                         TestLoad();
                     }

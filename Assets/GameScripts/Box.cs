@@ -13,6 +13,13 @@ public class Box
         yMax = _yMax;
     }
 
+    public Box(int[] coords) {
+        xMin = coords[0];
+        xMax = coords[1];
+        yMin = coords[2];
+        yMax = coords[3];
+    }
+
     public bool getOverlap(Box other, out Box overlap) {
 
         int xMinOverlap = Mathf.Max(xMin, other.xMin);
@@ -26,6 +33,10 @@ public class Box
         }
         overlap = new Box(xMinOverlap, xMaxOverlap, yMinOverlap, yMaxOverlap);
         return true;
+    }
+
+    public int[] getCoords() {
+        return new int[] {xMin, xMax, yMin, yMax};
     }
 
     public int getWidth() {

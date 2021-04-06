@@ -1,4 +1,5 @@
 using System.IO;
+using System.Collections.Generic;
 using UnityEngine;
 using HitstunConstants;
 
@@ -203,18 +204,36 @@ public class Character {
 
     public Box GetCollisionBox(CharacterData data) {
         int xMin, xMax, yMin, yMax;
+        int[] collisionBox = isAttacking() ? data.attacks[state.ToString()].collisionBox : data.animations[state.ToString()].collisionBox;
         if (facingRight) {
-            xMin = position.x + data.animations[state.ToString()].collisionBox[0];
-            xMax = position.x + data.animations[state.ToString()].collisionBox[1];
+            xMin = position.x + collisionBox[0];
+            xMax = position.x + collisionBox[1];
         } else {
-            xMin = position.x - data.animations[state.ToString()].collisionBox[1];
-            xMax = position.x - data.animations[state.ToString()].collisionBox[0];
+            xMin = position.x - collisionBox[1];
+            xMax = position.x - collisionBox[0];
         }
-        yMin = position.y + data.animations[state.ToString()].collisionBox[2];
-        yMax = position.y + data.animations[state.ToString()].collisionBox[3];
+        yMin = position.y + collisionBox[2];
+        yMax = position.y + collisionBox[3];
 
         Box box = new Box(xMin, xMax, yMin, yMax);
         return box;
+    }
+
+    public bool GetHitBoxes(CharacterData data, out List<Box> boxes) {
+        boxes = new List<Box>();
+        if (!isAttacking()) return false;
+        if (data.attacks[state.ToString()].hitboxes.ContainsKey(framesInState)) {
+            int[][] hitboxes = data.attacks[state.ToString()].hitboxes[framesInState];
+            for (int i=0; i<hitboxes.Length; i++) {
+                boxes.Add(new Box(hitboxes[i]));
+            }
+            return true;
+        }
+        return false;
+    }
+
+    public bool isAttacking() {
+        return state == CharacterState.CROUCH_MK;
     }
 
     public bool IsAirborne() {
@@ -233,24 +252,14 @@ public class Character {
             // CROUCH_TO_STAND STATE - technically already standing
             case CharacterState.CROUCH_TO_STAND:
                 if (!Motions.isMotionInput(GetInputsByRelativeIndex(0))) {
-                    if (checkGroundedSpecials(data)) {
-                        break;
-                    }
-                    // standing attacks
+                    if (checkGroundedSpecials(data)) break;
+                    // TODO check standing attacks
                 }
                 
-                if (checkDash()) {
-                    break;
-                }
-                if (checkJump(data)) {
-                    break;
-                }
-                if (checkCrouch(data)) {
-                    break;
-                }
-                if (checkWalk(data)) {
-                    break;
-                }
+                if (checkDash()) break;
+                if (checkJump(data)) break;
+                if (checkCrouch(data)) break;
+                if (checkWalk(data)) break;
                 // default idle
                 if (state == CharacterState.CROUCH_TO_STAND) {
                     if (framesInState >= data.animations[state.ToString()].totalFrames) {
@@ -267,26 +276,18 @@ public class Character {
             // STAND_TO_CROUCH STATE - technically already crouching
             case CharacterState.STAND_TO_CROUCH:
                 if (!Motions.isMotionInput(GetInputsByRelativeIndex(0))) {
-                    if (checkGroundedSpecials(data)) {
-                        break;
-                    }
-                    // crouching attacks
+                    if (checkGroundedSpecials(data)) break;
+                    if (checkCrouchingAttacks(data)) break;
                 }
-                if (checkDash()) {
-                    break;
-                }
-                if (checkJump(data)) {
-                    break;
-                }
-                if (checkStand(data)) {
-                    break;
-                }
+                if (checkDash()) break;
+                if (checkJump(data)) break;
+                if (checkStand(data)) break;
+                // default crouch
                 if (state == CharacterState.STAND_TO_CROUCH) {
                     if (framesInState >= data.animations[state.ToString()].totalFrames) {
                         setCharacterState(CharacterState.CROUCH);
                     }
                 }
-                // default crouch
                 velocity.x = 0;
                 velocity.y = 0;
                 break;
@@ -313,11 +314,23 @@ public class Character {
                     setCharacterState(CharacterState.IDLE);
                 }
                 break;
+            // CROUCH_MK STATE
+            case CharacterState.CROUCH_MK:
+                velocity.x = 0;
+                velocity.y = 0;
+                if (data.attacks[state.ToString()].dx != null) velocity.x = data.attacks[state.ToString()].dx[framesInState];
+                if (data.attacks[state.ToString()].dy != null) velocity.y = data.attacks[state.ToString()].dy[framesInState];
+                // check for cancels :O
+                if (framesInState >= data.attacks[state.ToString()].totalFrames - 1) {
+                    setCharacterState(CharacterState.CROUCH);
+                }
+                break;
+
             default:
                 Debug.Log("Character State invalid:" + state.ToString());
                 velocity.x = 0;
                 velocity.y = 0;
-                break;
+                break; 
         }
     }
 
@@ -342,6 +355,15 @@ public class Character {
             Debug.Log("QCF");
             return true;
         } 
+        return false;
+    }
+
+    public bool checkCrouchingAttacks(CharacterData data) {
+        uint latestInputs = GetInputsByRelativeIndex(0);
+        if ((latestInputs & (uint) Inputs.INPUT_MK) != 0) {
+            setCharacterState(CharacterState.CROUCH_MK);
+            return true;
+        }
         return false;
     }
 

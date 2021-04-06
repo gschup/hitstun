@@ -21,6 +21,7 @@ namespace HitstunConstants {
         public const int MAX_CHARACTER_DISTANCE = 3500;
 
         // Leniencies
+        public const int LENIENCY_BUFFER = 3;
         public const int LENIENCY_DASH = 5;
         public const int LENIENCY_QF = 10;
         public const int LENIENCY_DP = 15;
@@ -36,7 +37,7 @@ namespace HitstunConstants {
     public static class Motions {
         public static readonly uint[] DASH_FORWARD = {(uint)Inputs.INPUT_FORWARD, (uint)Inputs.INPUT_NEUTRAL, (uint)Inputs.INPUT_FORWARD};
         public static readonly uint[] DASH_BACKWARD = {(uint)Inputs.INPUT_BACK, (uint)Inputs.INPUT_NEUTRAL, (uint)Inputs.INPUT_BACK};
-        public static readonly uint[] QCF = {(uint)Inputs.INPUT_DOWN, (uint)Inputs.INPUT_DOWN | (uint)Inputs.INPUT_FORWARD, (uint)Inputs.INPUT_FORWARD};
+        public static readonly uint[] QCF = {(uint)Inputs.INPUT_DOWN, (uint)Inputs.INPUT_DOWN | (uint)Inputs.INPUT_FORWARD, (uint)Inputs.INPUT_FORWARD, (uint)Inputs.INPUT_LP};
         public static readonly uint[] QCB = {(uint)Inputs.INPUT_DOWN, (uint)Inputs.INPUT_DOWN | (uint)Inputs.INPUT_BACK, (uint)Inputs.INPUT_BACK};
         public static readonly uint[] DOUBLE_QCF = {(uint)Inputs.INPUT_DOWN, (uint)Inputs.INPUT_DOWN | (uint)Inputs.INPUT_FORWARD, (uint)Inputs.INPUT_FORWARD, (uint)Inputs.INPUT_DOWN, (uint)Inputs.INPUT_DOWN | (uint)Inputs.INPUT_FORWARD, (uint)Inputs.INPUT_FORWARD};
         public static readonly uint[] DP = {(uint)Inputs.INPUT_FORWARD, (uint)Inputs.INPUT_DOWN, (uint)Inputs.INPUT_DOWN | (uint)Inputs.INPUT_FORWARD};
@@ -94,6 +95,7 @@ namespace HitstunConstants {
     }
 
     public enum CharacterState {
+        // animations
         IDLE = 0,
         CROUCH = 1,
         WALK_FORWARD = 2,
@@ -104,7 +106,10 @@ namespace HitstunConstants {
         JUMP_FORWARD = 7,
         JUMP_BACKWARD = 8,
         DASH_FORWARD = 9,
-        DASH_BACKWARD = 10
+        DASH_BACKWARD = 10,
+
+        // attacks
+        CROUCH_MK = 11
     }
 }
 

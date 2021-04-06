@@ -14,11 +14,16 @@ public class CharacterView : MonoBehaviour {
     public bool showHitboxes { get; set; }
     private CharacterData data;
     private Dictionary<string, Sprite[]> sprites;
-    private HitboxView collisionBox;
+    private HitboxView collisionBoxView;
+    private List<HitboxView> hitboxViews;
+
+    public void Awake() {
+        sprites = new Dictionary<string, Sprite[]>();
+        hitboxViews = new List<HitboxView>();
+    }
 
     public void LoadResources(CharacterData _data) {
         data = _data;
-        sprites = new Dictionary<string, Sprite[]>();
 
         // load sprites from animation data and store them into dictionary
         foreach(KeyValuePair<string, Animation> kvp in data.animations) {
@@ -26,7 +31,18 @@ public class CharacterView : MonoBehaviour {
             Animation animation = kvp.Value;
             Sprite[] spriteArray = new Sprite[animation.distinctSprites];
             for (int i=0; i<animation.distinctSprites; i++) {
-                spriteArray[i] = Resources.Load<Sprite>("Sprites/" + data.name + "/" + animationName + "/" + animationName + "_" + i.ToString());
+                spriteArray[i] = Resources.Load<Sprite>("Sprites/" + data.name + "/ANIMATIONS/" + animationName + "/" + animationName + "_" + i.ToString());
+            }
+            sprites.Add(kvp.Key, spriteArray);
+        }
+
+        // load sprites from attack data and store them into dictionary
+        foreach(KeyValuePair<string, Attack> kvp in data.attacks) {
+            string animationName = kvp.Key;
+            Attack attack = kvp.Value;
+            Sprite[] spriteArray = new Sprite[attack.distinctSprites];
+            for (int i=0; i<attack.distinctSprites; i++) {
+                spriteArray[i] = Resources.Load<Sprite>("Sprites/" + data.name + "/ATTACKS/" + animationName + "/" + animationName + "_" + i.ToString());
             }
             sprites.Add(kvp.Key, spriteArray);
         }
@@ -35,7 +51,7 @@ public class CharacterView : MonoBehaviour {
     public void UpdateCharacterView(Character character, PlayerConnectionInfo info) {
         // display correct sprite based on state
         CharacterState currentState = character.state;
-        Animation currentAnimation = data.animations[currentState.ToString()];
+        Animation currentAnimation = character.isAttacking() ? data.attacks[currentState.ToString()] : data.animations[currentState.ToString()];
         int currentFrame = (int)character.framesInState % currentAnimation.totalFrames;
         int spriteIndex = 0;
         for (int i=0; i<currentAnimation.frameDuration.Length; i++) {
@@ -68,13 +84,40 @@ public class CharacterView : MonoBehaviour {
             spriteRenderer.sortingLayerName = "PLAYER_BOTTOM";
         }
 
-        // hitboxes
+        // boxes
         if (showHitboxes) {
-            if (collisionBox is null) {
-                collisionBox = Instantiate(hitboxPrefab, transform);
-                collisionBox.spriteRenderer.color = new Color(0f,1f,0f,.5f);
+            // collisionBox
+            if (collisionBoxView is null) {
+                collisionBoxView = Instantiate(hitboxPrefab, transform);
+                collisionBoxView.spriteRenderer.color = new Color(0f,1f,0f,.5f);
             }
-            collisionBox.setRect(viewX, viewY, zDistance, character.facingRight, currentAnimation.collisionBox);
+            collisionBoxView.setRect(viewX, viewY, zDistance, character.facingRight, currentAnimation.collisionBox);
+
+            //hitboxes
+            // deactivate all hitboxviews
+            foreach (HitboxView hitboxView in hitboxViews) {
+                hitboxView.spriteRenderer.enabled = false;
+            }
+
+            List<Box> hitboxes;
+            if (character.GetHitBoxes(data, out hitboxes)) {
+                int diff = hitboxes.Count - hitboxViews.Count;
+                // instanciate additional hitboxviews, if needed
+                if (diff > 0) {
+                    for (int i=0; i<diff; i++) {
+                        HitboxView hitboxView = Instantiate(hitboxPrefab, transform);
+                        hitboxView.spriteRenderer.color = new Color(1f,0f,0f,.5f);
+                        hitboxViews.Add(hitboxView);
+                    }
+                }
+                // set the hitboxviews to the correct place
+                foreach (HitboxView hitboxView in hitboxViews) {
+                    hitboxView.spriteRenderer.enabled = true;
+                    hitboxView.setRect(viewX, viewY, zDistance, character.facingRight, hitboxes[0].getCoords());
+                    hitboxes.RemoveAt(0);
+                    if (hitboxes.Count <= 0) break;                     
+                }
+            }
         }  
     }
 }

@@ -6,9 +6,11 @@ public class CharacterData {
     public string name;
     public Params constants;
     public Dictionary<string, Animation> animations;
+    public Dictionary<string, Attack> attacks;
 
     public CharacterData() {
         animations = new Dictionary<string, Animation>();
+        attacks = new Dictionary<string, Attack>();
     }
 }
 
@@ -21,6 +23,12 @@ public class Animation {
     public int[] dx;
     public int[] dy;
     public int[] collisionBox;
+}
+
+
+[Serializable]
+public class Attack : Animation {
+    public Dictionary<uint, int[][]> hitboxes;
 }
 
 [Serializable]
