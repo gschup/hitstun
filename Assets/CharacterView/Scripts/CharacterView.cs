@@ -16,10 +16,12 @@ public class CharacterView : MonoBehaviour {
     private Dictionary<string, Sprite[]> sprites;
     private HitboxView collisionBoxView;
     private List<HitboxView> hitboxViews;
+    private List<HitboxView> hurtboxViews;
 
     public void Awake() {
         sprites = new Dictionary<string, Sprite[]>();
         hitboxViews = new List<HitboxView>();
+        hurtboxViews = new List<HitboxView>();
     }
 
     public void LoadResources(CharacterData _data) {
@@ -90,6 +92,7 @@ public class CharacterView : MonoBehaviour {
             if (collisionBoxView is null) {
                 collisionBoxView = Instantiate(hitboxPrefab, transform);
                 collisionBoxView.spriteRenderer.color = new Color(0f,1f,0f,.5f);
+                collisionBoxView.spriteRenderer.sortingLayerName = "COLLISIONBOX";
             }
             collisionBoxView.setRect(viewX, viewY, zDistance, character.facingRight, currentAnimation.collisionBox);
 
@@ -107,6 +110,7 @@ public class CharacterView : MonoBehaviour {
                     for (int i=0; i<diff; i++) {
                         HitboxView hitboxView = Instantiate(hitboxPrefab, transform);
                         hitboxView.spriteRenderer.color = new Color(1f,0f,0f,.5f);
+                        hitboxView.spriteRenderer.sortingLayerName = "HITBOX";
                         hitboxViews.Add(hitboxView);
                     }
                 }
@@ -116,6 +120,33 @@ public class CharacterView : MonoBehaviour {
                     hitboxView.setRect(viewX, viewY, zDistance, character.facingRight, hitboxes[0].getCoords());
                     hitboxes.RemoveAt(0);
                     if (hitboxes.Count <= 0) break;                     
+                }
+            }
+
+            //hurtboxes
+            // deactivate all hurtboxviews
+            foreach (HitboxView hurtboxView in hurtboxViews) {
+                hurtboxView.spriteRenderer.enabled = false;
+            }
+
+            List<Box> hurtboxes;
+            if (character.GetHurtBoxes(data, out hurtboxes)) {
+                int diff = hurtboxes.Count - hurtboxViews.Count;
+                // instanciate additional hurtboxViews, if needed
+                if (diff > 0) {
+                    for (int i=0; i<diff; i++) {
+                        HitboxView hurtBoxView = Instantiate(hitboxPrefab, transform);
+                        hurtBoxView.spriteRenderer.color = new Color(0f,0f,1f,.5f);
+                        hurtBoxView.spriteRenderer.sortingLayerName = "HURTBOX";
+                        hurtboxViews.Add(hurtBoxView);
+                    }
+                }
+                // set the hurtboxViews to the correct place
+                foreach (HitboxView hurtboxView in hurtboxViews) {
+                    hurtboxView.spriteRenderer.enabled = true;
+                    hurtboxView.setRect(viewX, viewY, zDistance, character.facingRight, hurtboxes[0].getCoords());
+                    hurtboxes.RemoveAt(0);
+                    if (hurtboxes.Count <= 0) break;                     
                 }
             }
         }  

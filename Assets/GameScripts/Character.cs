@@ -205,10 +205,38 @@ public class Character {
     public bool GetHitBoxes(CharacterData data, out List<Box> boxes) {
         boxes = new List<Box>();
         if (!isAttacking()) return false;
-        if (data.attacks[state.ToString()].hitboxes.ContainsKey(framesInState)) {
-            int[][] hitboxes = data.attacks[state.ToString()].hitboxes[framesInState];
-            for (int i=0; i<hitboxes.Length; i++) {
-                boxes.Add(new Box(hitboxes[i]));
+        Attack attackData = data.attacks[state.ToString()];
+        if (attackData.hitBoxes is null) return false;
+
+        // get the hitboxes
+        if (attackData.hitBoxes.ContainsKey(framesInState)) {
+            int[][] hitBoxes = attackData.hitBoxes[framesInState];
+            for (int i=0; i<hitBoxes.Length; i++) {
+                boxes.Add(new Box(hitBoxes[i]));
+            }
+            return true;
+        }
+        return false;
+    }
+
+    public bool GetHurtBoxes(CharacterData data, out List<Box> boxes) {
+        boxes = new List<Box>();
+        Animation animationData;
+        if (isAttacking()) {
+            animationData = data.attacks[state.ToString()];
+        } else {
+            animationData = data.animations[state.ToString()];
+        }
+        if (animationData.hurtBoxes is null) return false;
+        
+        // check if the hurtboxes are static in this state
+        uint index = animationData.staticHurtBox ? 0 : framesInState;
+
+        // get the hurtboxes
+        if (animationData.hurtBoxes.ContainsKey(index)) {
+            int[][] hurtBoxes = animationData.hurtBoxes[index];
+            for (int i=0; i<hurtBoxes.Length; i++) {
+                boxes.Add(new Box(hurtBoxes[i]));
             }
             return true;
         }

@@ -1,15 +1,14 @@
 using System.IO;
 using Unity.Collections;
 using UnityEngine;
-using UnityEditor;
 using Newtonsoft.Json;
 
 using HitstunConstants;
 
 public class HitstunRunner : MonoBehaviour {
-    // Unity Settings
-    public bool localMode = true;
+    // Settings
     public bool showHitboxes = true;
+    public bool manualStep = false;
     public CharacterName player1Character;
     public CharacterName player2Character;
 
@@ -22,78 +21,81 @@ public class HitstunRunner : MonoBehaviour {
     CharacterData[] characterDatas;
     
     // Internal
-    float next;
+    float next, now;
     NativeArray<byte> buffer;
-    bool Running { get; set; }
+    private bool running;
+    private bool nextStep;
 
     void Start() {
-        Vector3[] verts = new Vector3[]
-        {
-            new Vector3(0, 0, 2),
-            new Vector3(0, Constants.BOUNDS_HEIGHT / Constants.SCALE, 2),
-            new Vector3(Constants.BOUNDS_WIDTH / Constants.SCALE, 0, 2),
-            new Vector3(Constants.BOUNDS_WIDTH / Constants.SCALE, Constants.BOUNDS_HEIGHT / Constants.SCALE, 2)
-        };
-        //Handles.DrawSolidRectangleWithOutline(verts, new Color(0.5f, 0.5f, 0.5f, 0.1f), new Color(0, 0, 0, 1));
-        if (localMode) {
-            // Init LocalSession
-            LocalSession.Init(new GameState(), new NonGameState());
-            // Init NonGameState
-            for (int i=0; i<=1;i++) {
-                LocalSession.ngs.players = new PlayerConnectionInfo[Constants.NUM_PLAYERS];
-                LocalSession.ngs.players[i] = new PlayerConnectionInfo {
-                    handle = i,
-                    type = PlayerType.LOCAL,
-                    controllerId = i
-                };
-                LocalSession.ngs.SetConnectState(i, PlayerConnectState.RUNNING);
-            }
-            // Init GameState
-            LocalSession.gs.Init();
-            // load character data from JSON
-            characterDatas = new CharacterData[Constants.NUM_PLAYERS];
-            string jsonPath = string.Format("Assets/Resources/CharacterData/{0}.json", player1Character.ToString());
-            characterDatas[0] = JsonConvert.DeserializeObject<CharacterData>(File.ReadAllText(jsonPath));
-            jsonPath = string.Format("Assets/Resources/CharacterData/{0}.json", player2Character.ToString());
-            characterDatas[1] = JsonConvert.DeserializeObject<CharacterData>(File.ReadAllText(jsonPath));
-            LocalSession.characterDatas = characterDatas;
-            LocalSession.gs.characterDatas = characterDatas;
-            // Init View
-            InitView(LocalSession.gs);
+        // Init LocalSession
+        LocalSession.Init(new GameState(), new NonGameState());
+        // Init NonGameState
+        for (int i=0; i<=1;i++) {
+            LocalSession.ngs.players = new PlayerConnectionInfo[Constants.NUM_PLAYERS];
+            LocalSession.ngs.players[i] = new PlayerConnectionInfo {
+                handle = i,
+                type = PlayerType.LOCAL,
+                controllerId = i
+            };
+            LocalSession.ngs.SetConnectState(i, PlayerConnectState.RUNNING);
         }
-        Running = true;
+        // Init GameState
+        LocalSession.gs.Init();
+        // load character data from JSON
+        characterDatas = new CharacterData[Constants.NUM_PLAYERS];
+        string jsonPath = string.Format("Assets/Resources/CharacterData/{0}.json", player1Character.ToString());
+        characterDatas[0] = JsonConvert.DeserializeObject<CharacterData>(File.ReadAllText(jsonPath));
+        jsonPath = string.Format("Assets/Resources/CharacterData/{0}.json", player2Character.ToString());
+        characterDatas[1] = JsonConvert.DeserializeObject<CharacterData>(File.ReadAllText(jsonPath));
+        LocalSession.characterDatas = characterDatas;
+        LocalSession.gs.characterDatas = characterDatas;
+        // Init View
+        InitView(LocalSession.gs);
+        running = true;
     }
 
     void Update() {
-        if (UnityEngine.Input.GetKey(UnityEngine.KeyCode.Escape)) {
+        if (UnityEngine.Input.GetKeyDown(UnityEngine.KeyCode.Escape)) {
             Application.Quit();
         }
-        if (Running) {
-            var now = Time.time;
-            var extraMs = Mathf.Max(0, (int)((next - now) * 1000f) - 1);
-            if (localMode) {
-                LocalSession.Idle(extraMs);
+        if (UnityEngine.Input.GetKeyDown(UnityEngine.KeyCode.F1)) {
+            Debug.Log("SAVE");
+            TestSave();
+        }
+        if (UnityEngine.Input.GetKeyDown(UnityEngine.KeyCode.F2)) {
+            Debug.Log("LOAD");
+            TestLoad();
+        }
+        if (UnityEngine.Input.GetKeyDown(UnityEngine.KeyCode.F3)) {
+            manualStep = !manualStep;
+            if (manualStep) {
+                Debug.Log("Manual mode on: Press F4 to advance a single frame");
+                running = false;
+                nextStep = false;
+            } else {
+                Debug.Log("Manual mode off");
+                running = true;
+                now = Time.time;
+                next = now + 1f / (float) Constants.FPS;
             }
+        }
+        if (UnityEngine.Input.GetKeyDown(UnityEngine.KeyCode.F4)) {
+            Debug.Log("Manual step");
+            nextStep = true;
+        }
 
+        if (running) {
+            now = Time.time;
             if (now >= next) {
-                if (localMode) {
-                    //long before = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
-                    LocalSession.RunFrame();
-                    if (UnityEngine.Input.GetKey(UnityEngine.KeyCode.F1)) {
-                        Debug.Log("SAVE");
-                        TestSave();
-                    }
-                    if (UnityEngine.Input.GetKey(UnityEngine.KeyCode.F2)) {
-                        Debug.Log("LOAD");
-                        TestLoad();
-                    }
-                }
-                next = now + 1f / 60f;
+                LocalSession.RunFrame();
+                UpdateGameView(LocalSession.gs, LocalSession.ngs);
+                next = now + 1f / (float) Constants.FPS;
             }
 
-            if (localMode) {
-                UpdateGameView(LocalSession.gs, LocalSession.ngs);
-            }
+        } else if (nextStep) {
+            LocalSession.RunFrame();
+            UpdateGameView(LocalSession.gs, LocalSession.ngs);
+            nextStep = false;
         }
     }
 
@@ -136,17 +138,13 @@ public class HitstunRunner : MonoBehaviour {
     }
 
     public void TestSave() {
-        if (localMode) {
-            if (buffer.IsCreated) {
-                buffer.Dispose();
-            }
-            buffer = GameState.ToBytes(LocalSession.gs);
+        if (buffer.IsCreated) {
+            buffer.Dispose();
         }
+        buffer = GameState.ToBytes(LocalSession.gs);
     }
 
     public void TestLoad() {
-        if (localMode) {
-            GameState.FromBytes(LocalSession.gs, buffer);
-        }
+        GameState.FromBytes(LocalSession.gs, buffer);
     }
 }

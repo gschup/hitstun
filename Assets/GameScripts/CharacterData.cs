@@ -23,12 +23,14 @@ public class Animation {
     public int[] dx;
     public int[] dy;
     public int[] collisionBox;
+    public bool staticHurtBox;
+    public Dictionary<uint, int[][]> hurtBoxes;
 }
 
 
 [Serializable]
 public class Attack : Animation {
-    public Dictionary<uint, int[][]> hitboxes;
+    public Dictionary<uint, int[][]> hitBoxes;
 }
 
 [Serializable]
