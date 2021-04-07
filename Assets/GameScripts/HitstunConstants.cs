@@ -6,7 +6,7 @@ namespace HitstunConstants {
         // Misc
         public const int FRAME_DELAY = 2;
         public const int NUM_PLAYERS = 2;
-        public const int INPUT_BUFFER_SIZE = 60;
+        public const int INPUT_BUFFER_SIZE = 30;
         public const int FPS = 60;
 
         // Camera
@@ -21,8 +21,8 @@ namespace HitstunConstants {
         public const int MAX_CHARACTER_DISTANCE = 3500;
 
         // Leniencies
-        public const int LENIENCY_BUFFER = 3;
-        public const int LENIENCY_DASH = 5;
+        public const int LENIENCY_BUFFER = 5;
+        public const int LENIENCY_DASH = 10;
         public const int LENIENCY_QF = 10;
         public const int LENIENCY_DP = 15;
         public const int LENIENCY_DOUBLE_QF = 20;
@@ -37,13 +37,13 @@ namespace HitstunConstants {
     public static class Motions {
         public static readonly uint[] DASH_FORWARD = {(uint)Inputs.INPUT_FORWARD, (uint)Inputs.INPUT_NEUTRAL, (uint)Inputs.INPUT_FORWARD};
         public static readonly uint[] DASH_BACKWARD = {(uint)Inputs.INPUT_BACK, (uint)Inputs.INPUT_NEUTRAL, (uint)Inputs.INPUT_BACK};
-        public static readonly uint[] QCF = {(uint)Inputs.INPUT_DOWN, (uint)Inputs.INPUT_DOWN | (uint)Inputs.INPUT_FORWARD, (uint)Inputs.INPUT_FORWARD, (uint)Inputs.INPUT_LP};
+        public static readonly uint[] QCF = {(uint)Inputs.INPUT_DOWN, (uint)Inputs.INPUT_DOWN | (uint)Inputs.INPUT_FORWARD, (uint)Inputs.INPUT_FORWARD};
         public static readonly uint[] QCB = {(uint)Inputs.INPUT_DOWN, (uint)Inputs.INPUT_DOWN | (uint)Inputs.INPUT_BACK, (uint)Inputs.INPUT_BACK};
         public static readonly uint[] DOUBLE_QCF = {(uint)Inputs.INPUT_DOWN, (uint)Inputs.INPUT_DOWN | (uint)Inputs.INPUT_FORWARD, (uint)Inputs.INPUT_FORWARD, (uint)Inputs.INPUT_DOWN, (uint)Inputs.INPUT_DOWN | (uint)Inputs.INPUT_FORWARD, (uint)Inputs.INPUT_FORWARD};
         public static readonly uint[] DP = {(uint)Inputs.INPUT_FORWARD, (uint)Inputs.INPUT_DOWN, (uint)Inputs.INPUT_DOWN | (uint)Inputs.INPUT_FORWARD};
 
         public static bool isMotionInput(Inputs input) {
-            return (uint) input < 16;
+            return isMotionInput((uint) input);
         }
         public static bool isMotionInput(uint input) {
             return input < 16;
@@ -74,7 +74,13 @@ namespace HitstunConstants {
         INPUT_HP = (1 << 6),
         INPUT_LK = (1 << 7),
         INPUT_MK = (1 << 8),
-        INPUT_HK = (1 << 9)
+        INPUT_HK = (1 << 9),
+        INPUT_nLP = (1 << 10),
+        INPUT_nMP = (1 << 11),
+        INPUT_nHP = (1 << 12),
+        INPUT_nLK = (1 << 13),
+        INPUT_nMK = (1 << 14),
+        INPUT_nHK = (1 << 15)
     }
 
     public enum PlayerType {

@@ -80,9 +80,9 @@
     "DASH_FORWARD": {
       "animationName": "DASH_FORWARD",
       "distinctSprites": 7,
-      "totalFrames": 17,
-      "frameDuration": [1,4,4,2,4,2],
-      "dx": [0,9000,4500,4500,4500,4500,4500,4500,4500,4500,0,0,0,0,0,0,0],
+      "totalFrames": 16,
+      "frameDuration": [1,4,4,2,4,1],
+      "dx": [0,9000,4500,4500,4500,4500,4500,4500,4500,4500,0,0,0,0,0,0],
       "collisionBox": [-250, 250, 0, 800]
     }
   },
