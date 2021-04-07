@@ -223,6 +223,15 @@ public class Character {
         return state == CharacterState.JUMP_NEUTRAL || state == CharacterState.JUMP_FORWARD || state == CharacterState.JUMP_BACKWARD;
     }
 
+    public bool IsIdle() {
+        return state == CharacterState.IDLE || 
+               state == CharacterState.WALK_BACKWARD || 
+               state == CharacterState.WALK_FORWARD || 
+               state == CharacterState.CROUCH || 
+               state == CharacterState.CROUCH_TO_STAND ||
+               state == CharacterState.STAND_TO_CROUCH;
+    }
+
     public void UpdateCharacter(CharacterData data) {
         framesInState++;
         switch (state) {

@@ -127,7 +127,7 @@ public class GameState {
                     } else if (characters[0].position.y > characters[1].position.y) {
                         resolveLeft = false;
                     } else {
-                        // it is getting awkward
+                        // it is getting awkward, just push player1 to the left (might need fixing)
                         Debug.Log("collision box resolution tied");
                         resolveLeft = true;
                     }
@@ -141,9 +141,9 @@ public class GameState {
 
         // update facing direction
         for (int i=0; i<Constants.NUM_PLAYERS; i++) {
-            if (characters[i].IsAirborne()) {
-                continue;
-            }
+            // don't update if the character is busy doing something
+            if (!characters[i].IsIdle()) continue;
+
             bool newFacing = (characters[i].position.x < characters[1-i].position.x) ? true : false;
             if (newFacing != characters[i].facingRight) {
                 characters[i].FlipInputBufferInputs();

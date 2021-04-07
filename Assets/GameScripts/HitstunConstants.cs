@@ -1,4 +1,4 @@
-using UnityEngine;
+using System;
 
 namespace HitstunConstants {
 
@@ -50,6 +50,7 @@ namespace HitstunConstants {
         }
     }
 
+    [Flags]
     public enum KeyPress : uint {
         KEY_LEFT = (1 << 0),
         KEY_RIGHT = (1 << 1),
@@ -63,6 +64,7 @@ namespace HitstunConstants {
         KEY_HK = (1 << 9)
     }
 
+    [Flags]
     public enum Inputs : uint {
         INPUT_NEUTRAL = 0,
         INPUT_BACK = (1 << 0),
