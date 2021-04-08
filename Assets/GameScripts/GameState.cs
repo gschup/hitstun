@@ -129,21 +129,22 @@ public class GameState {
             CharacterData thisData = characterDatas[i];
             CharacterData otherData = characterDatas[1-i];
 
-            List<Box> hitBoxes;
             List<Box> hurtBoxes;
-            if (thisChar.GetHitBoxes(thisData, out hitBoxes) && otherchar.GetHurtBoxes(otherData, out hurtBoxes)) {
-                // displace the boxes from relative coordinates to absolute coordinates
-                foreach (Box hitBox in hitBoxes) {
-                    hitBox.displace(thisChar.position.x, thisChar.position.y);
-                }
+            if (thisChar.hitBoxes.Count > 0 && otherchar.GetHurtBoxes(otherData, out hurtBoxes)) {
+                // displace the hurtboxes from relative coordinates to absolute coordinates
                 foreach (Box hurtBox in hurtBoxes) {
-                    hurtBox.displace(otherchar.position.x, otherchar.position.y);
+                    hurtBox.displace(otherchar.position.x, otherchar.position.y, otherchar.facingRight);
                 }
                 // detect colisions
-                foreach (Box hitBox in hitBoxes) {
+                foreach (HitBox hitBox in thisChar.hitBoxes) {
+                    if (hitBox.used | !hitBox.enabled) continue;
+                    Box absoluteHitBox = new HitBox(hitBox.getCoords());
+                    absoluteHitBox.displace(thisChar.position.x, thisChar.position.y, thisChar.facingRight);
+
                     foreach (Box hurtBox in hurtBoxes) {
                         Box overlap;
-                        if(hitBox.getOverlap(hurtBox, out overlap)) {
+                        if(absoluteHitBox.getOverlap(hurtBox, out overlap)) {
+                            hitBox.used = true;
                             Debug.Log("HIT!");
                         }
                     }

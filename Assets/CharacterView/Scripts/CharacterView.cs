@@ -103,24 +103,24 @@ public class CharacterView : MonoBehaviour {
                 hitboxView.spriteRenderer.enabled = false;
             }
 
-            List<Box> hitboxes;
-            if (character.GetHitBoxes(data, out hitboxes)) {
-                int diff = hitboxes.Count - hitboxViews.Count;
+            if (character.hitBoxes.Count > 0) {
+                int diff = character.hitBoxes.Count - hitboxViews.Count;
                 // instanciate additional hitboxviews, if needed
                 if (diff > 0) {
                     for (int i=0; i<diff; i++) {
                         HitboxView hitboxView = Instantiate(hitboxPrefab, transform);
                         hitboxView.spriteRenderer.color = new Color(1f,0f,0f,.5f);
                         hitboxView.spriteRenderer.sortingLayerName = "HITBOX";
+                        hitboxView.spriteRenderer.enabled = false;
                         hitboxViews.Add(hitboxView);
                     }
                 }
+
                 // set the hitboxviews to the correct place
-                foreach (HitboxView hitboxView in hitboxViews) {
-                    hitboxView.spriteRenderer.enabled = true;
-                    hitboxView.setRect(viewX, viewY, zDistance, character.facingRight, hitboxes[0].getCoords());
-                    hitboxes.RemoveAt(0);
-                    if (hitboxes.Count <= 0) break;                     
+                for (int i=0; i<character.hitBoxes.Count; i++) {
+                    if (!character.hitBoxes[i].enabled) continue;
+                    hitboxViews[i].setRect(viewX, viewY, zDistance, character.facingRight, character.hitBoxes[i].getCoords());
+                    hitboxViews[i].spriteRenderer.enabled = true;
                 }
             }
 

@@ -10,10 +10,11 @@ public class Character {
     public bool onTop;
     public CharacterState state;
     public uint framesInState;
+    public List<HitBox> hitBoxes;
 
     // Input Buffer
-    private uint[] _inputBuffer;
-    private uint _currentBufferPos;
+    private uint[] inputBuffer;
+    private uint currentBufferPos;
 
     public Character() {
         // position and velocity
@@ -23,11 +24,13 @@ public class Character {
         state = CharacterState.IDLE;
         framesInState = 0;
         // input Buffer
-        _currentBufferPos = 0;
-        _inputBuffer = new uint[Constants.INPUT_BUFFER_SIZE];
+        currentBufferPos = 0;
+        inputBuffer = new uint[Constants.INPUT_BUFFER_SIZE];
         for (int i=0; i<Constants.INPUT_BUFFER_SIZE; i++) {
-            _inputBuffer[i] = 0;
+            inputBuffer[i] = 0;
         }
+        // hitboxes list
+        hitBoxes = new List<HitBox>();
     }
 
     public void Serialize(BinaryWriter bw) {
@@ -44,10 +47,15 @@ public class Character {
         bw.Write((int)state);
         bw.Write(framesInState);
         // input buffer
-        for (int i = 0; i < Constants.INPUT_BUFFER_SIZE; ++i) {
-            bw.Write(_inputBuffer[i]);
+        for (int i=0; i<Constants.INPUT_BUFFER_SIZE; i++) {
+            bw.Write(inputBuffer[i]);
         }
-        bw.Write(_currentBufferPos);
+        bw.Write(currentBufferPos);
+        // hitbox list
+        bw.Write(hitBoxes.Count);
+        foreach (HitBox hitBox in hitBoxes) {
+            hitBox.Serialize(bw);
+        }
     }
 
     public void Deserialize(BinaryReader br) {
@@ -64,11 +72,18 @@ public class Character {
         state = (CharacterState) br.ReadInt32();
         framesInState = br.ReadUInt32();
         // input buffer
-        _inputBuffer = new uint[Constants.INPUT_BUFFER_SIZE];
+        inputBuffer = new uint[Constants.INPUT_BUFFER_SIZE];
         for (int i = 0; i < Constants.INPUT_BUFFER_SIZE; ++i) {
-            _inputBuffer[i] = br.ReadUInt32();
+            inputBuffer[i] = br.ReadUInt32();
         }
-        _currentBufferPos = br.ReadUInt32();
+        currentBufferPos = br.ReadUInt32();
+        // hitbox list
+        int hitBoxCount = br.ReadInt32();
+        for (int i=0; i<hitBoxCount; i++) {
+            HitBox hitbox = new HitBox();
+            hitBoxes.Add(hitbox);
+            hitbox.Deserialize(br);
+        }
     }
 
     public void AddInputsToBuffer(uint inputs) {
@@ -107,39 +122,39 @@ public class Character {
         convertedInputs |= ((sanitizedInputs & (uint) KeyPress.KEY_HK) != 0) ? (uint) Inputs.INPUT_HK : (uint) Inputs.INPUT_nHK;
 
         // update buffer position
-        _currentBufferPos = (_currentBufferPos + 1) % Constants.INPUT_BUFFER_SIZE;
-        _inputBuffer[_currentBufferPos] = convertedInputs;
+        currentBufferPos = (currentBufferPos + 1) % Constants.INPUT_BUFFER_SIZE;
+        inputBuffer[currentBufferPos] = convertedInputs;
     }
 
     // index is relative, 0 is latest, -1 is one in the past etc
     public uint GetInputsByRelativeIndex(int index) {
-        int newIndex = (int)_currentBufferPos + index;
+        int newIndex = (int)currentBufferPos + index;
         if (newIndex < 0) {
             newIndex += Constants.INPUT_BUFFER_SIZE;
         }
-        return _inputBuffer[newIndex % Constants.INPUT_BUFFER_SIZE];
+        return inputBuffer[newIndex % Constants.INPUT_BUFFER_SIZE];
     }
 
     public void FlipInputBufferInputs() {
         for (int i=0; i<Constants.INPUT_BUFFER_SIZE; i++) {
-            bool forward = (_inputBuffer[i] & (uint) Inputs.INPUT_FORWARD) != 0;
-            bool back = (_inputBuffer[i] & (uint) Inputs.INPUT_BACK) != 0;
+            bool forward = (inputBuffer[i] & (uint) Inputs.INPUT_FORWARD) != 0;
+            bool back = (inputBuffer[i] & (uint) Inputs.INPUT_BACK) != 0;
 
-            _inputBuffer[i] &= ~ (uint) Inputs.INPUT_FORWARD;
-            _inputBuffer[i] &= ~ (uint) Inputs.INPUT_BACK;
+            inputBuffer[i] &= ~ (uint) Inputs.INPUT_FORWARD;
+            inputBuffer[i] &= ~ (uint) Inputs.INPUT_BACK;
 
             if (forward) {
-                _inputBuffer[i] |= (uint) Inputs.INPUT_BACK;
+                inputBuffer[i] |= (uint) Inputs.INPUT_BACK;
             }
             if (back) {
-                _inputBuffer[i] |= (uint) Inputs.INPUT_FORWARD;
+                inputBuffer[i] |= (uint) Inputs.INPUT_FORWARD;
             }
         }
     }
 
     public void FlushBuffer() {
         for (int i=0; i<Constants.INPUT_BUFFER_SIZE; i++) {
-            _inputBuffer[i] = 0;
+            inputBuffer[i] = 0;
         }
     }
 
@@ -182,6 +197,7 @@ public class Character {
         if (state != _state) {
             state = _state;
             framesInState = 0;
+            hitBoxes.Clear();
         }
     }
 
@@ -200,23 +216,6 @@ public class Character {
 
         Box box = new Box(xMin, xMax, yMin, yMax);
         return box;
-    }
-
-    public bool GetHitBoxes(CharacterData data, out List<Box> boxes) {
-        boxes = new List<Box>();
-        if (!isAttacking()) return false;
-        Attack attackData = data.attacks[state.ToString()];
-        if (attackData.hitBoxes is null) return false;
-
-        // get the hitboxes
-        if (attackData.hitBoxes.ContainsKey(framesInState)) {
-            int[][] hitBoxes = attackData.hitBoxes[framesInState];
-            for (int i=0; i<hitBoxes.Length; i++) {
-                boxes.Add(new Box(hitBoxes[i]));
-            }
-            return true;
-        }
-        return false;
     }
 
     public bool GetHurtBoxes(CharacterData data, out List<Box> boxes) {
@@ -262,6 +261,11 @@ public class Character {
 
     public void UpdateCharacter(CharacterData data) {
         framesInState++;
+        // update hitboxes
+        foreach (HitBox hitBox in hitBoxes) {
+            hitBox.enabled = hitBox.startingFrame <= framesInState && hitBox.startingFrame + hitBox.duration >= framesInState;
+        }
+
         switch (state) {
             // IDLE STATE
             case CharacterState.IDLE:
@@ -425,6 +429,16 @@ public class Character {
     public bool CheckCrouchingAttacks(CharacterData data) {
         if (CheckSequence(new uint[] {(uint) Inputs.INPUT_nMK, (uint) Inputs.INPUT_MK}, Constants.LENIENCY_BUFFER)) {
             setCharacterState(CharacterState.CROUCH_MK);
+            // prepare the hitboxes
+            foreach (HitBox hb in data.attacks[state.ToString()].hitBoxes) {
+                HitBox hitBox = new HitBox(hb.xMin, hb.xMax, hb.yMin, hb.yMax);
+                hitBox.duration = hb.duration;
+                hitBox.enabled = false;
+                hitBox.used = false;
+                hitBox.startingFrame = hb.startingFrame;
+
+                hitBoxes.Add(hitBox);
+            }
             return true;
         }
         return false;

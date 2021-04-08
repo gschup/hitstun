@@ -1,5 +1,7 @@
 using System;
+using System.IO;
 using System.Collections.Generic;
+using UnityEngine;
 
 [Serializable]
 public class CharacterData {
@@ -13,6 +15,7 @@ public class CharacterData {
         attacks = new Dictionary<string, Attack>();
     }
 }
+
 
 [Serializable]
 public class Animation {
@@ -30,12 +33,122 @@ public class Animation {
 
 [Serializable]
 public class Attack : Animation {
-    public Dictionary<uint, int[][]> hitBoxes;
+    public HitBox[] hitBoxes;
 }
+
 
 [Serializable]
 public class Params {
     public int WALK_FORWARD;
     public int WALK_BACKWARD;
     public int JUMP_VELOCITY_X;
+}
+
+
+[Serializable]
+public class Box
+{
+    public int xMin, xMax, yMin, yMax;
+
+    public Box() {
+        xMin = xMax = yMin = yMax = 0;
+    }
+
+    public Box(int _xMin, int _xMax, int _yMin, int _yMax) {
+        xMin = _xMin;
+        xMax = _xMax;
+        yMin = _yMin;
+        yMax = _yMax;
+    }
+
+    public Box(int[] coords) {
+        xMin = coords[0];
+        xMax = coords[1];
+        yMin = coords[2];
+        yMax = coords[3];
+    }
+
+    public bool getOverlap(Box other, out Box overlap) {
+
+        int xMinOverlap = Mathf.Max(xMin, other.xMin);
+        int xMaxOverlap = Mathf.Min(xMax, other.xMax);
+        int yMinOverlap = Mathf.Max(yMin, other.yMin);
+        int yMaxOverlap = Mathf.Min(yMax, other.yMax);
+
+        if (xMinOverlap >= xMaxOverlap || yMinOverlap >= yMaxOverlap) {
+            overlap = new Box(0,0,0,0);
+            return false;
+        }
+        overlap = new Box(xMinOverlap, xMaxOverlap, yMinOverlap, yMaxOverlap);
+        return true;
+    }
+
+    public void displace(int x, int y, bool facingRight) {
+        int xMinOld = xMin;
+        int xMaxOld = xMax;
+        if (facingRight) {
+            xMin = x + xMinOld;
+            xMax = x + xMaxOld;
+        } else {
+            xMin = x - xMaxOld;
+            xMax = x - xMinOld;
+        }
+        
+        yMin += y;
+        yMax += y;
+    }
+
+    public int[] getCoords() {
+        return new int[] {xMin, xMax, yMin, yMax};
+    }
+
+    public int getWidth() {
+        return xMax - xMin;
+    }
+
+    public int getHeight() {
+        return yMax - yMin;
+    }
+
+    public override string ToString() {
+        return "Box: " + xMin.ToString() + ", " + xMax.ToString() + ", " + yMin.ToString() + ", " + yMax.ToString();
+    }
+}
+
+
+[Serializable]
+public class HitBox : Box {
+
+    public int startingFrame;
+    public int duration;
+    public bool enabled;
+    public bool used;
+
+    public HitBox() : base() {    }
+
+    public HitBox(int _xMin, int _xMax, int _yMin, int _yMax) : base(_xMin, _xMax, _yMin, _yMax) {    }
+
+    public HitBox(int[] coords) : base(coords) {    }
+
+    public void Serialize(BinaryWriter bw) {
+        bw.Write(xMin);
+        bw.Write(xMax);
+        bw.Write(yMin);
+        bw.Write(yMax);
+        bw.Write(startingFrame);
+        bw.Write(duration);
+        bw.Write(enabled);
+        bw.Write(used);
+    }
+
+    public void Deserialize(BinaryReader br) {
+        xMin = br.ReadInt32();
+        xMax = br.ReadInt32();
+        yMin = br.ReadInt32();
+        yMax = br.ReadInt32();
+        startingFrame = br.ReadInt32();
+        duration = br.ReadInt32();
+        enabled = br.ReadBoolean();
+        used = br.ReadBoolean();
+    }
 }
