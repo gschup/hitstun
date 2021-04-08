@@ -55,21 +55,24 @@ public class HitstunRunner : MonoBehaviour {
     }
 
     void Update() {
+        // quit
         if (UnityEngine.Input.GetKeyDown(UnityEngine.KeyCode.Escape)) {
             Application.Quit();
         }
+        // toggle hitboxes
         if (UnityEngine.Input.GetKeyDown(UnityEngine.KeyCode.F1)) {
-            Debug.Log("SAVE");
-            TestSave();
-        }
+            showHitboxes = !showHitboxes;
+            if (showHitboxes) {
+                Debug.Log("Hitboxes ON");
+            } else {
+                Debug.Log("Hitboxes OFF");
+            }
+        }        
+        // manual stepping
         if (UnityEngine.Input.GetKeyDown(UnityEngine.KeyCode.F2)) {
-            Debug.Log("LOAD");
-            TestLoad();
-        }
-        if (UnityEngine.Input.GetKeyDown(UnityEngine.KeyCode.F3)) {
             manualStep = !manualStep;
             if (manualStep) {
-                Debug.Log("Manual mode on: Press F4 to advance a single frame");
+                Debug.Log("Manual mode on: Press F3 to advance a single frame");
                 running = false;
                 nextStep = false;
             } else {
@@ -79,9 +82,18 @@ public class HitstunRunner : MonoBehaviour {
                 next = now + 1f / (float) Constants.FPS;
             }
         }
-        if (UnityEngine.Input.GetKeyDown(UnityEngine.KeyCode.F4)) {
+        if (UnityEngine.Input.GetKeyDown(UnityEngine.KeyCode.F3)) {
             Debug.Log("Manual step");
             nextStep = true;
+        }
+        // save and load
+        if (UnityEngine.Input.GetKeyDown(UnityEngine.KeyCode.F5)) {
+            Debug.Log("SAVE");
+            TestSave();
+        }
+        if (UnityEngine.Input.GetKeyDown(UnityEngine.KeyCode.F6)) {
+            Debug.Log("LOAD");
+            TestLoad();
         }
 
         if (running) {
@@ -106,6 +118,7 @@ public class HitstunRunner : MonoBehaviour {
         }
         // update characterView objects
         for (int i = 0; i < Constants.NUM_PLAYERS; ++i) {
+            characterViews[i].showHitboxes = showHitboxes;
             characterViews[i].UpdateCharacterView(gs.characters[i], ngs.players[i]);
         }
         // update cameraPosition

@@ -94,6 +94,7 @@ public class CharacterView : MonoBehaviour {
                 collisionBoxView.spriteRenderer.color = new Color(0f,1f,0f,.5f);
                 collisionBoxView.spriteRenderer.sortingLayerName = "COLLISIONBOX";
             }
+            collisionBoxView.spriteRenderer.enabled = true;
             collisionBoxView.setRect(viewX, viewY, zDistance, character.facingRight, currentAnimation.collisionBox);
 
             //hitboxes
@@ -149,6 +150,17 @@ public class CharacterView : MonoBehaviour {
                     if (hurtboxes.Count <= 0) break;                     
                 }
             }
-        }  
+        } else {
+            // deactivate collisionboxview
+            collisionBoxView.spriteRenderer.enabled = false;
+            // deactivate all hitboxviews
+            foreach (HitboxView hitboxView in hitboxViews) {
+                hitboxView.spriteRenderer.enabled = false;
+            }
+            // deactivate all hurtboxviews
+            foreach (HitboxView hurtboxView in hurtboxViews) {
+                hurtboxView.spriteRenderer.enabled = false;
+            }
+        }
     }
 }
