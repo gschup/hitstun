@@ -28,6 +28,7 @@ namespace HitstunConstants {
         public const int LENIENCY_DOUBLE_QF = 20;
 
         // Jump parameters
+        public const int PREJUMP_FRAMES = 3;
         public const int JUMP_HEIGHT = 1000;
         public const float TIME_TO_PEAK = 0.25f;
         public const int GRAVITY = (int) (-(2*JUMP_HEIGHT) / (TIME_TO_PEAK * TIME_TO_PEAK));

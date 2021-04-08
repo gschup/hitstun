@@ -33,6 +33,13 @@ public class Box
         return true;
     }
 
+    public void displace(int x, int y) {
+        xMin += x;
+        xMax += x;
+        yMin += y;
+        yMax += y;
+    }
+
     public int[] getCoords() {
         return new int[] {xMin, xMax, yMin, yMax};
     }

@@ -274,8 +274,8 @@ public class Character {
                 if (CheckGroundedSpecials(data)) break;
                 if (CheckStandingAttacks(data)) break; 
                 if (CheckDash()) break;
-                if (CheckJump(data)) break;
-                if (CheckCrouch(data)) break;
+                if (CheckJump()) break;
+                if (CheckCrouch()) break;
                 if (CheckWalk(data)) break;
                 // default idle
                 if (state == CharacterState.CROUCH_TO_STAND) {
@@ -295,8 +295,8 @@ public class Character {
                 if (CheckGroundedSpecials(data)) break;
                 if (CheckCrouchingAttacks(data)) break;
                 if (CheckDash()) break;
-                if (CheckJump(data)) break;
-                if (CheckStand(data)) break;
+                if (CheckJump()) break;
+                if (CheckStand()) break;
                 // default crouch
                 if (state == CharacterState.STAND_TO_CROUCH) {
                     if (framesInState >= data.animations[state.ToString()].totalFrames) {
@@ -308,15 +308,60 @@ public class Character {
                 break;
             // JUMP_NEUTRAL STATE
             case CharacterState.JUMP_NEUTRAL:
-            // JUMP_FORWARD STATE
-            case CharacterState.JUMP_FORWARD:
-            // JUMP_BACKWARD STATE
-            case CharacterState.JUMP_BACKWARD:
-                velocity.x = velocity.x;       
+                if (framesInState < Constants.PREJUMP_FRAMES) {
+                    velocity.x = 0;
+                    velocity.y = 0;
+                    break;
+                }
+                if (framesInState == Constants.PREJUMP_FRAMES) {
+                    velocity.x = 0;
+                    velocity.y = Constants.JUMP_VELOCITY_Y;
+                    break;
+                }
+                velocity.x = 0;
                 velocity.y += Constants.GRAVITY / Constants.FPS;
+            
                 if (position.y <= 0) {
                     setCharacterState(CharacterState.IDLE);
-                }
+                }          
+                break;
+            // JUMP_FORWARD STATE
+            case CharacterState.JUMP_FORWARD:
+                if (framesInState < Constants.PREJUMP_FRAMES) {
+                    velocity.x = 0;
+                    velocity.y = 0;
+                    break;
+                } 
+                if (framesInState == Constants.PREJUMP_FRAMES) {
+                    velocity.x = facingRight? data.constants.JUMP_VELOCITY_X : -data.constants.JUMP_VELOCITY_X;
+                    velocity.y = Constants.JUMP_VELOCITY_Y;
+                    break;
+                } 
+                velocity.x = velocity.x;
+                velocity.y += Constants.GRAVITY / Constants.FPS;
+            
+                if (position.y <= 0) {
+                    setCharacterState(CharacterState.IDLE);
+                }                
+                break;
+            // JUMP_BACKWARD STATE
+            case CharacterState.JUMP_BACKWARD:
+                if (framesInState < Constants.PREJUMP_FRAMES) {
+                    velocity.x = 0;
+                    velocity.y = 0;
+                    break;
+                } 
+                if (framesInState == Constants.PREJUMP_FRAMES) {
+                    velocity.x = facingRight? -data.constants.JUMP_VELOCITY_X : data.constants.JUMP_VELOCITY_X;
+                    velocity.y = Constants.JUMP_VELOCITY_Y;
+                    break;
+                } 
+                velocity.x = velocity.x;
+                velocity.y += Constants.GRAVITY / Constants.FPS;
+            
+                if (position.y <= 0) {
+                    setCharacterState(CharacterState.IDLE);
+                }       
                 break;
             // DASH_FORWARD STATE
             case CharacterState.DASH_FORWARD:
@@ -399,29 +444,29 @@ public class Character {
         return false;
     }
 
-    public bool CheckJump(CharacterData data) {
+    public bool CheckJump() {
         if (CheckSequence(new uint[] {(uint) Inputs.INPUT_UP | (uint) Inputs.INPUT_FORWARD}, Constants.LENIENCY_BUFFER)) {
             setCharacterState(CharacterState.JUMP_FORWARD);
-            velocity.x = facingRight? data.constants.JUMP_VELOCITY_X : -data.constants.JUMP_VELOCITY_X;
-            velocity.y = Constants.JUMP_VELOCITY_Y;
+            velocity.x = 0;
+            velocity.y = 0;
             return true;
         }
         if (CheckSequence(new uint[] {(uint) Inputs.INPUT_UP | (uint) Inputs.INPUT_BACK}, Constants.LENIENCY_BUFFER)) {
             setCharacterState(CharacterState.JUMP_BACKWARD);
-            velocity.x = facingRight? -data.constants.JUMP_VELOCITY_X : data.constants.JUMP_VELOCITY_X;
-            velocity.y = Constants.JUMP_VELOCITY_Y;
+            velocity.x = 0;
+            velocity.y = 0;
             return true;
         }
         if (CheckSequence(new uint[] {(uint) Inputs.INPUT_UP}, Constants.LENIENCY_BUFFER)) {
             setCharacterState(CharacterState.JUMP_NEUTRAL);
             velocity.x = 0;
-            velocity.y = Constants.JUMP_VELOCITY_Y;
+            velocity.y = 0;
             return true;
         }
         return false;
     }
 
-    public bool CheckCrouch(CharacterData data) {
+    public bool CheckCrouch() {
         uint latestInput = GetInputsByRelativeIndex(0);
         if ((latestInput & (uint) Inputs.INPUT_DOWN) != 0) {
             setCharacterState(CharacterState.STAND_TO_CROUCH);
@@ -432,7 +477,7 @@ public class Character {
         return false;
     }
 
-    public bool CheckStand(CharacterData data) {
+    public bool CheckStand() {
         uint latestInput = GetInputsByRelativeIndex(0);
         if ((latestInput & (uint) Inputs.INPUT_DOWN) == 0) {
             setCharacterState(CharacterState.CROUCH_TO_STAND);

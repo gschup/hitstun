@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 using Unity.Collections;
@@ -84,6 +85,13 @@ public class GameState {
             characters[i].position.y += characters[i].velocity.y / Constants.FPS;            
         }
 
+        // interactions between characters
+        // handle hitbox hurtbox interaction
+        handleHitBoxes();
+
+        // handle collision box overlap
+        handleCollisionBoxes();
+
         for (int i = 0; i < Constants.NUM_PLAYERS; i++) {
             // force players to stay within max distance
             if (Math.Abs(characters[i].position.x - characters[1-i].position.x) > Constants.MAX_CHARACTER_DISTANCE) {
@@ -92,7 +100,7 @@ public class GameState {
                 } else {
                     characters[i].position.x = characters[1-i].position.x - Constants.MAX_CHARACTER_DISTANCE;
                 }
-            }              
+            }
 
             // force players to stay within bounds
             characters[i].position.x = characters[i].position.x >= 0 ? characters[i].position.x : 0;
@@ -101,8 +109,50 @@ public class GameState {
             characters[i].position.y = characters[i].position.y <= Constants.BOUNDS_HEIGHT ? characters[i].position.y : Constants.BOUNDS_HEIGHT;
         }
 
-        // interactions between characters
-        // handle collision box overlap
+        // update facing direction
+        for (int i=0; i<Constants.NUM_PLAYERS; i++) {
+            // don't update if the character is busy doing something
+            if (!characters[i].IsIdle()) continue;
+
+            bool newFacing = (characters[i].position.x < characters[1-i].position.x) ? true : false;
+            if (newFacing != characters[i].facingRight) {
+                characters[i].FlipInputBufferInputs();
+            }
+            characters[i].facingRight = newFacing;
+        }
+    }
+
+    public void handleHitBoxes() {
+        for (int i=0; i<Constants.NUM_PLAYERS; i++) {
+            Character thisChar = characters[i];
+            Character otherchar = characters[1-i];
+            CharacterData thisData = characterDatas[i];
+            CharacterData otherData = characterDatas[1-i];
+
+            List<Box> hitBoxes;
+            List<Box> hurtBoxes;
+            if (thisChar.GetHitBoxes(thisData, out hitBoxes) && otherchar.GetHurtBoxes(otherData, out hurtBoxes)) {
+                // displace the boxes from relative coordinates to absolute coordinates
+                foreach (Box hitBox in hitBoxes) {
+                    hitBox.displace(thisChar.position.x, thisChar.position.y);
+                }
+                foreach (Box hurtBox in hurtBoxes) {
+                    hurtBox.displace(otherchar.position.x, otherchar.position.y);
+                }
+                // detect colisions
+                foreach (Box hitBox in hitBoxes) {
+                    foreach (Box hurtBox in hurtBoxes) {
+                        Box overlap;
+                        if(hitBox.getOverlap(hurtBox, out overlap)) {
+                            Debug.Log("HIT!");
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    public void handleCollisionBoxes() {
         Box box1 = characters[0].GetCollisionBox(characterDatas[0]);
         Box box2 = characters[1].GetCollisionBox(characterDatas[1]);
 
@@ -137,18 +187,6 @@ public class GameState {
             int pushDistance = (overlap.getWidth() / 2) + 1;
             characters[0].position.x += resolveLeft ? -pushDistance : pushDistance;
             characters[1].position.x += resolveLeft ? pushDistance : -pushDistance;
-        }
-
-        // update facing direction
-        for (int i=0; i<Constants.NUM_PLAYERS; i++) {
-            // don't update if the character is busy doing something
-            if (!characters[i].IsIdle()) continue;
-
-            bool newFacing = (characters[i].position.x < characters[1-i].position.x) ? true : false;
-            if (newFacing != characters[i].facingRight) {
-                characters[i].FlipInputBufferInputs();
-            }
-            characters[i].facingRight = newFacing;
         }
     }
 }
