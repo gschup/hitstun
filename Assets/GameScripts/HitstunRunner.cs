@@ -28,7 +28,9 @@ public class HitstunRunner : MonoBehaviour
 
     void Start()
     {   
-        Application.targetFrameRate = 60;
+        // Fix the FPS
+        Application.targetFrameRate = Constants.FPS;
+        Time.fixedDeltaTime = 1f/(float)Constants.FPS;
         // Init LocalSession
         LocalSession.Init(new GameState(), new NonGameState());
         // Init NonGameState
@@ -52,8 +54,11 @@ public class HitstunRunner : MonoBehaviour
         running = true;
     }
 
-    void Update()
-    {   
+    void FixedUpdate() {
+        if (Time.deltaTime < 0.016f || Time.deltaTime > 0.017f)
+        {
+            Debug.Log("Unstable update tick!" + Time.deltaTime.ToString());
+        }
         // handles function key debugging inputs
         HandleDevKeys();
         if (running || nextStep)

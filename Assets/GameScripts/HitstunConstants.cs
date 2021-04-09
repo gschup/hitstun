@@ -8,7 +8,7 @@ namespace HitstunConstants
         // Misc
         public const int FRAME_DELAY = 2;
         public const int NUM_PLAYERS = 2;
-        public const int INPUT_BUFFER_SIZE = 30;
+        public const int INPUT_BUFFER_SIZE = 60;
         public const int FPS = 60;
 
         // Camera
@@ -133,10 +133,12 @@ namespace HitstunConstants
         DASH_BACKWARD = 10,
         BlOCK_HIGH = 11,
         BLOCK_STAND = 12,
-        BLOCK_LOW =13,
+        BLOCK_LOW = 13,
+        HIT_STAND = 14,
+        HIT_CROUCH = 15,
 
         // attacks
-        CROUCH_MK = 14
+        CROUCH_MK = 16
     }
 }
 

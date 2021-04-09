@@ -171,9 +171,29 @@ public class GameState
                 defendingChar.velocity.x = attackingChar.facingRight ? hitBox.pushback : -hitBox.pushback;
             }  
         }
+        // apply hit
         else
-        {
-            Debug.Log("HIT!");
+        {   
+            // set correct hit state
+            if (defendingChar.IsCrouch())
+            {
+                defendingChar.SetCharacterState(CharacterState.HIT_CROUCH);
+            }
+            else if (defendingChar.IsStand())
+            {
+                defendingChar.SetCharacterState(CharacterState.HIT_STAND);
+            }
+            // apply hitstun
+            defendingChar.hitStun = hitBox.hitstun;
+            // apply velocity
+            if (defendingChar.IsInCorner()) 
+            {
+                attackingChar.velocity.x = attackingChar.facingRight ? -hitBox.pushback : hitBox.pushback;
+            }
+            else 
+            {
+                defendingChar.velocity.x = attackingChar.facingRight ? hitBox.pushback : -hitBox.pushback;
+            }  
         }
     }
 

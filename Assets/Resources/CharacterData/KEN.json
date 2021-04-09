@@ -284,6 +284,28 @@
       "hurtBoxes": {
         "0": [[-320, 330, 0, 740]]
       }
+    },
+    "HIT_CROUCH": {
+      "animationName": "HIT_CROUCH",
+      "distinctSprites": 4,
+      "totalFrames": 13,
+      "frameDuration": [1,4,4,4],
+      "collisionBox": [-270, 270, 0, 400],
+      "staticHurtbox": true,
+      "hurtBoxes": {
+        "0": [[-320, 330, 0, 740]]
+      }
+    },
+    "HIT_STAND": {
+      "animationName": "HIT_STAND",
+      "distinctSprites": 5,
+      "totalFrames": 17,
+      "frameDuration": [1,4,4,4,4],
+      "collisionBox": [-250, 250, 0, 800],
+      "staticHurtbox": true,
+      "hurtBoxes": {
+        "0": [[-300, 300, 0, 1100]]
+      }
     }
   },
   "attacks": {
@@ -300,9 +322,9 @@
           "yMin": 0,
           "yMax": 200,
           "startingFrame": 7,
-          "duration": 5,
+          "duration": 4,
           "blockstun": 16,
-          "hitstun": 16,
+          "hitstun": 17,
           "hitstop": 7,
           "pushback": 4000,
           "type": 1 

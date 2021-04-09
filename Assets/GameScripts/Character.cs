@@ -12,6 +12,7 @@ public class Character
     public CharacterState state;
     public uint framesInState;
     public uint blockStun;
+    public uint hitStun;
     public List<HitBox> hitBoxes;
 
     // Input Buffer
@@ -52,6 +53,7 @@ public class Character
         bw.Write((int)state);
         bw.Write(framesInState);
         bw.Write(blockStun);
+        bw.Write(hitStun);
         // input buffer
         for (int i = 0; i < Constants.INPUT_BUFFER_SIZE; i++)
         {
@@ -81,6 +83,7 @@ public class Character
         state = (CharacterState)br.ReadInt32();
         framesInState = br.ReadUInt32();
         blockStun = br.ReadUInt32();
+        hitStun = br.ReadUInt32();
         // input buffer
         inputBuffer = new uint[Constants.INPUT_BUFFER_SIZE];
         for (int i = 0; i < Constants.INPUT_BUFFER_SIZE; ++i)
@@ -310,9 +313,27 @@ public class Character
     public bool IsCrouch()
     {
         return state == CharacterState.CROUCH ||
-               state == CharacterState.STAND_TO_CROUCH;
+               state == CharacterState.STAND_TO_CROUCH ||
+               state == CharacterState.BLOCK_LOW ||
+               state == CharacterState.HIT_CROUCH ||
+               state == CharacterState.CROUCH_MK;
     }
 
+    public bool IsStand()
+    {
+        return state == CharacterState.IDLE ||
+               state == CharacterState.WALK_BACKWARD ||
+               state == CharacterState.WALK_FORWARD ||
+               state == CharacterState.CROUCH_TO_STAND ||
+               state == CharacterState.DASH_FORWARD ||
+               state == CharacterState.DASH_BACKWARD ||
+               state == CharacterState.BLOCK_STAND ||
+               state == CharacterState.BlOCK_HIGH ||
+               state == CharacterState.HIT_STAND ||
+               (state == CharacterState.JUMP_NEUTRAL && framesInState <= Constants.PREJUMP_FRAMES) ||
+               (state == CharacterState.JUMP_FORWARD && framesInState <= Constants.PREJUMP_FRAMES) ||
+               (state == CharacterState.JUMP_BACKWARD && framesInState <= Constants.PREJUMP_FRAMES);
+    }
 
     public bool IsInCorner()
     {
@@ -512,6 +533,44 @@ public class Character
                 else if (blockStun > 0)
                 {
                     blockStun--;
+                }
+                else
+                {
+                    SetCharacterState(CharacterState.CROUCH);
+                }
+                velocity.x += facingRight ? Constants.FRICTION : -Constants.FRICTION;
+                velocity.x = facingRight ? Mathf.Min(velocity.x, 0) : Mathf.Max(velocity.x, 0);
+                velocity.y = velocity.y;
+                break;
+            // HIT_STAND STATE
+            case CharacterState.HIT_STAND:
+                if (hitStun > (data.animations[state.ToString()].distinctSprites - 1) * 4)
+                {
+                    hitStun--;
+                    framesInState--;
+                }
+                else if (hitStun > 0)
+                {
+                    hitStun--;
+                }
+                else
+                {
+                    SetCharacterState(CharacterState.IDLE);
+                }
+                velocity.x += facingRight ? Constants.FRICTION : -Constants.FRICTION;
+                velocity.x = facingRight ? Mathf.Min(velocity.x, 0) : Mathf.Max(velocity.x, 0);
+                velocity.y = velocity.y;
+                break;
+            // HIT_CROUCH STATE
+            case CharacterState.HIT_CROUCH:
+                if (hitStun > (data.animations[state.ToString()].distinctSprites - 1) * 4)
+                {
+                    hitStun--;
+                    framesInState--;
+                }
+                else if (hitStun > 0)
+                {
+                    hitStun--;
                 }
                 else
                 {
