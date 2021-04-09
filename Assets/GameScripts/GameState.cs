@@ -11,7 +11,7 @@ using HitstunConstants;
 public class GameState
 {
     public uint frameNumber;
-    public uint hitStop;
+    public uint hitstop;
     public Character[] characters;
     public CharacterData[] characterDatas;
 
@@ -20,7 +20,7 @@ public class GameState
         // Frame Number
         bw.Write(frameNumber);
         // hitstop
-        bw.Write(hitStop);
+        bw.Write(hitstop);
         // Character State
         for (int i = 0; i < characters.Length; ++i)
         {
@@ -33,7 +33,7 @@ public class GameState
         // Frame Number
         frameNumber = br.ReadUInt32();
         // hitstop
-        hitStop = br.ReadUInt32();
+        hitstop = br.ReadUInt32();
         // Character State
         characters = new Character[Constants.NUM_PLAYERS];
         for (int i = 0; i < characters.Length; ++i)
@@ -101,16 +101,15 @@ public class GameState
         }
 
         // hitstop
-        if (hitStop > 0)
+        if (hitstop > 0)
         {
-            hitStop--;
+            hitstop--;
             return;
         }
 
         // update character state, this also updates velocities
         for (int i = 0; i < Constants.NUM_PLAYERS; i++)
         {
-            
             characters[i].UpdateCharacter(characterDatas[i]);
         }
 
@@ -138,7 +137,7 @@ public class GameState
     public void ApplyHitBox(Character attackingChar, Character defendingChar, HitBox hitBox)
     {
         // apply hitstop
-        hitStop = hitBox.hitStop;
+        hitstop = hitBox.hitstop;
         // check if blocking
         bool blocked = (hitBox.type == HitBoxType.MID && defendingChar.IsBlockingMid())
                     || (hitBox.type == HitBoxType.LOW && defendingChar.IsBlockingLow())
@@ -150,19 +149,27 @@ public class GameState
             // set correct blocking state
             if (defendingChar.IsCrouch())
             {
-                defendingChar.setCharacterState(CharacterState.BLOCK_LOW);
+                defendingChar.SetCharacterState(CharacterState.BLOCK_LOW);
             }
             else if (hitBox.type == HitBoxType.MID)
             {
-                defendingChar.setCharacterState(CharacterState.BLOCK_STAND);
+                defendingChar.SetCharacterState(CharacterState.BLOCK_STAND);
             }
             else
             {
-                defendingChar.setCharacterState(CharacterState.BlOCK_HIGH);
+                defendingChar.SetCharacterState(CharacterState.BlOCK_HIGH);
             }
             // apply blockstun
-            defendingChar.blockStun = hitBox.blockStun;
-            defendingChar.velocity.x = attackingChar.facingRight ? 3000 : -3000;
+            defendingChar.blockStun = hitBox.blockstun;
+            // apply velocity
+            if (defendingChar.IsInCorner()) 
+            {
+                attackingChar.velocity.x = attackingChar.facingRight ? -hitBox.pushback : hitBox.pushback;
+            }
+            else 
+            {
+                defendingChar.velocity.x = attackingChar.facingRight ? hitBox.pushback : -hitBox.pushback;
+            }  
         }
         else
         {
@@ -171,7 +178,8 @@ public class GameState
     }
 
     public void HandleHitBoxes()
-    {
+    {   
+        HitBox[] applicableHitboxes = new HitBox[Constants.NUM_PLAYERS];
         for (int i = 0; i < Constants.NUM_PLAYERS; i++)
         {
             Character thisChar = characters[i];
@@ -193,7 +201,7 @@ public class GameState
                 {
                     if (hitDetected) break;
                     if (hitBox.used | !hitBox.enabled) continue;
-                    Box absoluteHitBox = new HitBox(hitBox.GetCoords());
+                    HitBox absoluteHitBox = new HitBox(hitBox);
                     absoluteHitBox.Displace(thisChar.position.x, thisChar.position.y, thisChar.facingRight);
 
                     foreach (Box hurtBox in hurtBoxes)
@@ -203,12 +211,20 @@ public class GameState
                         {
                             hitBox.used = true;
                             hitDetected = true;
-                            ApplyHitBox(thisChar, otherchar, hitBox);
+                            thisChar.onTop = true;
+                            otherchar.onTop = false;
+                            applicableHitboxes[i] = absoluteHitBox;
                             break;
                         }
                     }
                 }
             }
+        }
+        // apply the chosen hitboxes
+        for (int i = 0; i < Constants.NUM_PLAYERS; i++)
+        {
+            if (applicableHitboxes[i] is null) continue;
+            ApplyHitBox(characters[i], characters[1-i], applicableHitboxes[i]);
         }
     }
 

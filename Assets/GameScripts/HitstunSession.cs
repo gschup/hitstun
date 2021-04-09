@@ -93,6 +93,10 @@ public static class LocalSession
             {
                 input |= (uint)KeyPress.KEY_RIGHT;
             }
+            if (UnityEngine.Input.GetKey(UnityEngine.KeyCode.RightControl))
+            {
+                input |= (uint)KeyPress.KEY_MK;
+            }
         }
         return input;
     }

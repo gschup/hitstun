@@ -150,9 +150,10 @@ public class HitBox : Box
     public bool enabled;
     public bool used;
     public HitBoxType type;
-    public uint blockStun;
-    public uint hitStun;
-    public uint hitStop;
+    public uint blockstun;
+    public uint hitstun;
+    public uint hitstop;
+    public int pushback;
 
     public HitBox() : base() { }
 
@@ -170,9 +171,10 @@ public class HitBox : Box
         enabled = copy.enabled;
         used = copy.used;
         type = copy.type;
-        blockStun = copy.blockStun;
-        hitStun = copy.hitStun;
-        hitStop = copy.hitStop;
+        blockstun = copy.blockstun;
+        hitstun = copy.hitstun;
+        hitstop = copy.hitstop;
+        pushback = copy.pushback;
     }
 
     public void Serialize(BinaryWriter bw)
@@ -186,9 +188,10 @@ public class HitBox : Box
         bw.Write(enabled);
         bw.Write(used);
         bw.Write((int)type);
-        bw.Write(blockStun);
-        bw.Write(hitStun);
-        bw.Write(hitStop);
+        bw.Write(blockstun);
+        bw.Write(hitstun);
+        bw.Write(hitstop);
+        bw.Write(pushback);
     }
 
     public void Deserialize(BinaryReader br)
@@ -202,8 +205,9 @@ public class HitBox : Box
         enabled = br.ReadBoolean();
         used = br.ReadBoolean();
         type = (HitBoxType)br.ReadInt32();
-        blockStun = br.ReadUInt32();
-        hitStun = br.ReadUInt32();
-        hitStop = br.ReadUInt32();
+        blockstun = br.ReadUInt32();
+        hitstun = br.ReadUInt32();
+        hitstop = br.ReadUInt32();
+        pushback = br.ReadInt32();
     }
 }

@@ -32,12 +32,13 @@ namespace HitstunConstants
         // Jump parameters
         public const int PREJUMP_FRAMES = 3;
         public const int JUMP_HEIGHT = 1000;
-        public const float TIME_TO_PEAK = 0.25f;
+        public const float TIME_TO_PEAK = 0.3f;
         public const int GRAVITY = (int)(-(2 * JUMP_HEIGHT) / (TIME_TO_PEAK * TIME_TO_PEAK));
         public const int JUMP_VELOCITY_Y = (int)(2 * JUMP_HEIGHT / TIME_TO_PEAK);
 
         // pushback
         public const int FRICTION = 300;
+        public const int PUSHBACK_CORNER_THRESH = 100;
     }
 
     public static class Motions
