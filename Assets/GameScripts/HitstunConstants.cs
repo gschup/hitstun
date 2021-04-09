@@ -1,8 +1,10 @@
 using System;
 
-namespace HitstunConstants {
+namespace HitstunConstants
+{
 
-    public static class Constants {
+    public static class Constants
+    {
         // Misc
         public const int FRAME_DELAY = 2;
         public const int NUM_PLAYERS = 2;
@@ -31,28 +33,35 @@ namespace HitstunConstants {
         public const int PREJUMP_FRAMES = 3;
         public const int JUMP_HEIGHT = 1000;
         public const float TIME_TO_PEAK = 0.25f;
-        public const int GRAVITY = (int) (-(2*JUMP_HEIGHT) / (TIME_TO_PEAK * TIME_TO_PEAK));
-        public const int JUMP_VELOCITY_Y = (int) (2*JUMP_HEIGHT / TIME_TO_PEAK);
+        public const int GRAVITY = (int)(-(2 * JUMP_HEIGHT) / (TIME_TO_PEAK * TIME_TO_PEAK));
+        public const int JUMP_VELOCITY_Y = (int)(2 * JUMP_HEIGHT / TIME_TO_PEAK);
+
+        // pushback
+        public const int FRICTION = 300;
     }
 
-    public static class Motions {
-        public static readonly uint[] DASH_FORWARD = {(uint)Inputs.INPUT_FORWARD, (uint)Inputs.INPUT_NEUTRAL, (uint)Inputs.INPUT_FORWARD};
-        public static readonly uint[] DASH_BACKWARD = {(uint)Inputs.INPUT_BACK, (uint)Inputs.INPUT_NEUTRAL, (uint)Inputs.INPUT_BACK};
-        public static readonly uint[] QCF = {(uint)Inputs.INPUT_DOWN, (uint)Inputs.INPUT_DOWN | (uint)Inputs.INPUT_FORWARD, (uint)Inputs.INPUT_FORWARD};
-        public static readonly uint[] QCB = {(uint)Inputs.INPUT_DOWN, (uint)Inputs.INPUT_DOWN | (uint)Inputs.INPUT_BACK, (uint)Inputs.INPUT_BACK};
-        public static readonly uint[] DOUBLE_QCF = {(uint)Inputs.INPUT_DOWN, (uint)Inputs.INPUT_DOWN | (uint)Inputs.INPUT_FORWARD, (uint)Inputs.INPUT_FORWARD, (uint)Inputs.INPUT_DOWN, (uint)Inputs.INPUT_DOWN | (uint)Inputs.INPUT_FORWARD, (uint)Inputs.INPUT_FORWARD};
-        public static readonly uint[] DP = {(uint)Inputs.INPUT_FORWARD, (uint)Inputs.INPUT_DOWN, (uint)Inputs.INPUT_DOWN | (uint)Inputs.INPUT_FORWARD};
+    public static class Motions
+    {
+        public static readonly uint[] DASH_FORWARD = { (uint)Inputs.INPUT_FORWARD, (uint)Inputs.INPUT_NEUTRAL, (uint)Inputs.INPUT_FORWARD };
+        public static readonly uint[] DASH_BACKWARD = { (uint)Inputs.INPUT_BACK, (uint)Inputs.INPUT_NEUTRAL, (uint)Inputs.INPUT_BACK };
+        public static readonly uint[] QCF = { (uint)Inputs.INPUT_DOWN, (uint)Inputs.INPUT_DOWN | (uint)Inputs.INPUT_FORWARD, (uint)Inputs.INPUT_FORWARD };
+        public static readonly uint[] QCB = { (uint)Inputs.INPUT_DOWN, (uint)Inputs.INPUT_DOWN | (uint)Inputs.INPUT_BACK, (uint)Inputs.INPUT_BACK };
+        public static readonly uint[] DOUBLE_QCF = { (uint)Inputs.INPUT_DOWN, (uint)Inputs.INPUT_DOWN | (uint)Inputs.INPUT_FORWARD, (uint)Inputs.INPUT_FORWARD, (uint)Inputs.INPUT_DOWN, (uint)Inputs.INPUT_DOWN | (uint)Inputs.INPUT_FORWARD, (uint)Inputs.INPUT_FORWARD };
+        public static readonly uint[] DP = { (uint)Inputs.INPUT_FORWARD, (uint)Inputs.INPUT_DOWN, (uint)Inputs.INPUT_DOWN | (uint)Inputs.INPUT_FORWARD };
 
-        public static bool isMotionInput(Inputs input) {
-            return isMotionInput((uint) input);
+        public static bool isMotionInput(Inputs input)
+        {
+            return isMotionInput((uint)input);
         }
-        public static bool isMotionInput(uint input) {
+        public static bool isMotionInput(uint input)
+        {
             return input < 16;
         }
     }
 
     [Flags]
-    public enum KeyPress : uint {
+    public enum KeyPress : uint
+    {
         KEY_LEFT = (1 << 0),
         KEY_RIGHT = (1 << 1),
         KEY_UP = (1 << 2),
@@ -66,7 +75,8 @@ namespace HitstunConstants {
     }
 
     [Flags]
-    public enum Inputs : uint {
+    public enum Inputs : uint
+    {
         INPUT_NEUTRAL = 0,
         INPUT_BACK = (1 << 0),
         INPUT_FORWARD = (1 << 1),
@@ -86,12 +96,14 @@ namespace HitstunConstants {
         INPUT_nHK = (1 << 15)
     }
 
-    public enum PlayerType {
+    public enum PlayerType
+    {
         LOCAL = 0,
         REMOTE,
     };
 
-    public enum PlayerConnectState {
+    public enum PlayerConnectState
+    {
         CONNECTING = 0,
         SYNCHRONIZING,
         RUNNING,
@@ -99,11 +111,13 @@ namespace HitstunConstants {
         DISCONNECTING,
     };
 
-    public enum CharacterName {
+    public enum CharacterName
+    {
         KEN = 0
     }
 
-    public enum CharacterState {
+    public enum CharacterState
+    {
         // animations
         IDLE = 0,
         CROUCH = 1,
@@ -116,9 +130,12 @@ namespace HitstunConstants {
         JUMP_BACKWARD = 8,
         DASH_FORWARD = 9,
         DASH_BACKWARD = 10,
+        BlOCK_HIGH = 11,
+        BLOCK_STAND = 12,
+        BLOCK_LOW =13,
 
         // attacks
-        CROUCH_MK = 11
+        CROUCH_MK = 14
     }
 }
 

@@ -5,7 +5,8 @@ using Newtonsoft.Json;
 
 using HitstunConstants;
 
-public class HitstunRunner : MonoBehaviour {
+public class HitstunRunner : MonoBehaviour
+{
     // Settings
     public bool showHitboxes = true;
     public bool manualStep = false;
@@ -19,20 +20,23 @@ public class HitstunRunner : MonoBehaviour {
 
     // Character Data
     CharacterData[] characterDatas;
-    
+
     // Internal
     float next, now;
     NativeArray<byte> buffer;
     private bool running;
     private bool nextStep;
 
-    void Start() {
+    void Start()
+    {
         // Init LocalSession
         LocalSession.Init(new GameState(), new NonGameState());
         // Init NonGameState
-        for (int i=0; i<=1;i++) {
+        for (int i = 0; i <= 1; i++)
+        {
             LocalSession.ngs.players = new PlayerConnectionInfo[Constants.NUM_PLAYERS];
-            LocalSession.ngs.players[i] = new PlayerConnectionInfo {
+            LocalSession.ngs.players[i] = new PlayerConnectionInfo
+            {
                 handle = i,
                 type = PlayerType.LOCAL,
                 controllerId = i
@@ -54,70 +58,90 @@ public class HitstunRunner : MonoBehaviour {
         running = true;
     }
 
-    void Update() {
+    void Update()
+    {
         // quit
-        if (UnityEngine.Input.GetKeyDown(UnityEngine.KeyCode.Escape)) {
+        if (UnityEngine.Input.GetKeyDown(UnityEngine.KeyCode.Escape))
+        {
             Application.Quit();
         }
         // toggle hitboxes
-        if (UnityEngine.Input.GetKeyDown(UnityEngine.KeyCode.F1)) {
+        if (UnityEngine.Input.GetKeyDown(UnityEngine.KeyCode.F1))
+        {
             showHitboxes = !showHitboxes;
-            if (showHitboxes) {
+            if (showHitboxes)
+            {
                 Debug.Log("Hitboxes ON");
-            } else {
+            }
+            else
+            {
                 Debug.Log("Hitboxes OFF");
             }
-        }        
+        }
         // manual stepping
-        if (UnityEngine.Input.GetKeyDown(UnityEngine.KeyCode.F2)) {
+        if (UnityEngine.Input.GetKeyDown(UnityEngine.KeyCode.F2))
+        {
             manualStep = !manualStep;
-            if (manualStep) {
+            if (manualStep)
+            {
                 Debug.Log("Manual mode on: Press F3 to advance a single frame");
                 running = false;
                 nextStep = false;
-            } else {
+            }
+            else
+            {
                 Debug.Log("Manual mode off");
                 running = true;
                 now = Time.time;
-                next = now + 1f / (float) Constants.FPS;
+                next = now + 1f / (float)Constants.FPS;
             }
         }
-        if (UnityEngine.Input.GetKeyDown(UnityEngine.KeyCode.F3)) {
+        if (UnityEngine.Input.GetKeyDown(UnityEngine.KeyCode.F3))
+        {
             Debug.Log("Manual step");
             nextStep = true;
         }
         // save and load
-        if (UnityEngine.Input.GetKeyDown(UnityEngine.KeyCode.F5)) {
+        if (UnityEngine.Input.GetKeyDown(UnityEngine.KeyCode.F5))
+        {
             Debug.Log("SAVE");
             TestSave();
         }
-        if (UnityEngine.Input.GetKeyDown(UnityEngine.KeyCode.F6)) {
+        if (UnityEngine.Input.GetKeyDown(UnityEngine.KeyCode.F6))
+        {
             Debug.Log("LOAD");
             TestLoad();
         }
-
-        if (running) {
+        // loop-di-loop
+        if (running)
+        {
             now = Time.time;
-            if (now >= next) {
+            if (now >= next)
+            {
                 LocalSession.RunFrame();
                 UpdateGameView(LocalSession.gs, LocalSession.ngs);
-                next = now + 1f / (float) Constants.FPS;
+                next = now + 1f / (float)Constants.FPS;
             }
 
-        } else if (nextStep) {
+        }
+        else if (nextStep)
+        {
             LocalSession.RunFrame();
             UpdateGameView(LocalSession.gs, LocalSession.ngs);
             nextStep = false;
         }
     }
 
-    void UpdateGameView(GameState gs, NonGameState ngs) {
+    void UpdateGameView(GameState gs, NonGameState ngs)
+    {
         // create characterView objects
-        if (characterViews.Length != Constants.NUM_PLAYERS) {
+        if (characterViews.Length != Constants.NUM_PLAYERS)
+        {
             InitView(gs);
         }
         // update characterView objects
-        for (int i = 0; i < Constants.NUM_PLAYERS; ++i) {
+        for (int i = 0; i < Constants.NUM_PLAYERS; ++i)
+        {
             characterViews[i].showHitboxes = showHitboxes;
             characterViews[i].UpdateCharacterView(gs.characters[i], ngs.players[i]);
         }
@@ -125,39 +149,48 @@ public class HitstunRunner : MonoBehaviour {
         float xMean = (gs.characters[0].position.x + gs.characters[1].position.x) / 2.0f;
         float xMeanTranslated = (xMean - Constants.BOUNDS_WIDTH / 2.0f) / Constants.SCALE;
         float newCamPos = xMeanTranslated;
-        if (newCamPos <Constants.CAM_LOWER_BOUND) {
+        if (newCamPos < Constants.CAM_LOWER_BOUND)
+        {
             newCamPos = Constants.CAM_LOWER_BOUND;
         }
-        if (newCamPos > Constants.CAM_UPPER_BOUND) {
+        if (newCamPos > Constants.CAM_UPPER_BOUND)
+        {
             newCamPos = Constants.CAM_UPPER_BOUND;
         }
         mainCamera.transform.position = new Vector3(newCamPos, 1, -3);
     }
 
-    void InitView(GameState gs) {
+    void InitView(GameState gs)
+    {
         characterViews = new CharacterView[Constants.NUM_PLAYERS];
 
-        for (int i = 0; i < Constants.NUM_PLAYERS; ++i) {       
+        for (int i = 0; i < Constants.NUM_PLAYERS; ++i)
+        {
             characterViews[i] = Instantiate(characterView, transform);
             characterViews[i].LoadResources(characterDatas[i]);
             characterViews[i].showHitboxes = showHitboxes;
         }
     }
 
-    void OnDestroy() {
-        if (buffer.IsCreated) {
+    void OnDestroy()
+    {
+        if (buffer.IsCreated)
+        {
             buffer.Dispose();
         }
     }
 
-    public void TestSave() {
-        if (buffer.IsCreated) {
+    public void TestSave()
+    {
+        if (buffer.IsCreated)
+        {
             buffer.Dispose();
         }
         buffer = GameState.ToBytes(LocalSession.gs);
     }
 
-    public void TestLoad() {
+    public void TestLoad()
+    {
         GameState.FromBytes(LocalSession.gs, buffer);
     }
 }
