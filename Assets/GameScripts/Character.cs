@@ -25,7 +25,7 @@ public class Character
         position = new Vector2Int(0, 0);
         velocity = new Vector2Int(0, 0);
         // character state
-        state = CharacterState.IDLE;
+        state = CharacterState.STAND;
         framesInState = 0;
         // input Buffer
         currentBufferPos = 0;
@@ -292,7 +292,7 @@ public class Character
 
     public bool isAttacking()
     {
-        return state == CharacterState.CROUCH_MK;
+        return state == CharacterState.CROUCH_MK || state == CharacterState.HADOUKEN;
     }
 
     public bool IsAirborne()
@@ -302,7 +302,7 @@ public class Character
 
     public bool IsIdle()
     {
-        return state == CharacterState.IDLE ||
+        return state == CharacterState.STAND ||
                state == CharacterState.WALK_BACKWARD ||
                state == CharacterState.WALK_FORWARD ||
                state == CharacterState.CROUCH ||
@@ -321,7 +321,7 @@ public class Character
 
     public bool IsStand()
     {
-        return state == CharacterState.IDLE ||
+        return state == CharacterState.STAND ||
                state == CharacterState.WALK_BACKWARD ||
                state == CharacterState.WALK_FORWARD ||
                state == CharacterState.CROUCH_TO_STAND ||
@@ -366,7 +366,7 @@ public class Character
         switch (state)
         {
             // IDLE STATE
-            case CharacterState.IDLE:
+            case CharacterState.STAND:
             // WALK_FORWARD STATE
             case CharacterState.WALK_FORWARD:
             // WALK_BACKWARD STATE
@@ -384,12 +384,12 @@ public class Character
                 {
                     if (framesInState >= data.animations[state.ToString()].totalFrames)
                     {
-                        SetCharacterState(CharacterState.IDLE);
+                        SetCharacterState(CharacterState.STAND);
                     }
                 }
                 else
                 {
-                    SetCharacterState(CharacterState.IDLE);
+                    SetCharacterState(CharacterState.STAND);
                 }
                 velocity.x = 0;
                 velocity.y = 0;
@@ -433,7 +433,7 @@ public class Character
 
                 if (position.y <= 0)
                 {
-                    SetCharacterState(CharacterState.IDLE);
+                    SetCharacterState(CharacterState.STAND);
                 }
                 break;
             // JUMP_FORWARD STATE
@@ -455,7 +455,7 @@ public class Character
 
                 if (position.y <= 0)
                 {
-                    SetCharacterState(CharacterState.IDLE);
+                    SetCharacterState(CharacterState.STAND);
                 }
                 break;
             // JUMP_BACKWARD STATE
@@ -477,7 +477,7 @@ public class Character
 
                 if (position.y <= 0)
                 {
-                    SetCharacterState(CharacterState.IDLE);
+                    SetCharacterState(CharacterState.STAND);
                 }
                 break;
             // DASH_FORWARD STATE
@@ -489,17 +489,7 @@ public class Character
                 velocity.y = 0;
                 if (framesInState >= data.animations[state.ToString()].totalFrames - 1)
                 {
-                    SetCharacterState(CharacterState.IDLE);
-                }
-                break;
-            // CROUCH_MK STATE
-            case CharacterState.CROUCH_MK:
-                velocity.x += facingRight ? Constants.FRICTION : -Constants.FRICTION;
-                velocity.x = facingRight ? Mathf.Min(velocity.x, 0) : Mathf.Max(velocity.x, 0);
-                // check for cancels :O
-                if (framesInState >= data.attacks[state.ToString()].totalFrames - 1)
-                {
-                    SetCharacterState(CharacterState.CROUCH);
+                    SetCharacterState(CharacterState.STAND);
                 }
                 break;
             // BLOCK_HIGH STATE
@@ -517,7 +507,7 @@ public class Character
                 }
                 else
                 {
-                    SetCharacterState(CharacterState.IDLE);
+                    SetCharacterState(CharacterState.STAND);
                 }
                 velocity.x += facingRight ? Constants.FRICTION : -Constants.FRICTION;
                 velocity.x = facingRight ? Mathf.Min(velocity.x, 0) : Mathf.Max(velocity.x, 0);
@@ -555,7 +545,7 @@ public class Character
                 }
                 else
                 {
-                    SetCharacterState(CharacterState.IDLE);
+                    SetCharacterState(CharacterState.STAND);
                 }
                 velocity.x += facingRight ? Constants.FRICTION : -Constants.FRICTION;
                 velocity.x = facingRight ? Mathf.Min(velocity.x, 0) : Mathf.Max(velocity.x, 0);
@@ -579,6 +569,26 @@ public class Character
                 velocity.x += facingRight ? Constants.FRICTION : -Constants.FRICTION;
                 velocity.x = facingRight ? Mathf.Min(velocity.x, 0) : Mathf.Max(velocity.x, 0);
                 velocity.y = velocity.y;
+                break;
+            // CROUCH_MK STATE
+            case CharacterState.CROUCH_MK:
+                velocity.x += facingRight ? Constants.FRICTION : -Constants.FRICTION;
+                velocity.x = facingRight ? Mathf.Min(velocity.x, 0) : Mathf.Max(velocity.x, 0);
+                // check for cancels
+                if (framesInState >= data.attacks[state.ToString()].totalFrames - 1)
+                {
+                    SetCharacterState(CharacterState.CROUCH);
+                }
+                break;
+            // HADOUKEN STATE
+            case CharacterState.HADOUKEN:
+                velocity.x += facingRight ? Constants.FRICTION : -Constants.FRICTION;
+                velocity.x = facingRight ? Mathf.Min(velocity.x, 0) : Mathf.Max(velocity.x, 0);
+                // check for cancels
+                if (framesInState >= data.attacks[state.ToString()].totalFrames - 1)
+                {
+                    SetCharacterState(CharacterState.STAND);
+                }
                 break;
             default:
                 Debug.Log("Character State invalid:" + state.ToString());
@@ -608,10 +618,10 @@ public class Character
             Debug.Log("QCB");
             return true;
         }
-        if (CheckSequence(Motions.QCF, Constants.LENIENCY_QF))
+        if (CheckSequence(Motions.HADOUKEN, Constants.LENIENCY_QF))
         {
             FlushBuffer();
-            Debug.Log("QCF");
+            SetCharacterState(CharacterState.HADOUKEN);
             return true;
         }
         return false;

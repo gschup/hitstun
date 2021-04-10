@@ -160,6 +160,7 @@ public class GameState
                 defendingChar.SetCharacterState(CharacterState.BlOCK_HIGH);
             }
             // apply blockstun
+            defendingChar.framesInState = 0;
             defendingChar.blockStun = hitBox.blockstun;
             // apply velocity
             if (defendingChar.IsInCorner()) 
@@ -184,6 +185,7 @@ public class GameState
                 defendingChar.SetCharacterState(CharacterState.HIT_STAND);
             }
             // apply hitstun
+            defendingChar.framesInState = 0;
             defendingChar.hitStun = hitBox.hitstun;
             // apply velocity
             if (defendingChar.IsInCorner()) 

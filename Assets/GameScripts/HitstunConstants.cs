@@ -46,6 +46,7 @@ namespace HitstunConstants
         public static readonly uint[] DASH_FORWARD = { (uint)Inputs.INPUT_FORWARD, (uint)Inputs.INPUT_NEUTRAL, (uint)Inputs.INPUT_FORWARD };
         public static readonly uint[] DASH_BACKWARD = { (uint)Inputs.INPUT_BACK, (uint)Inputs.INPUT_NEUTRAL, (uint)Inputs.INPUT_BACK };
         public static readonly uint[] QCF = { (uint)Inputs.INPUT_DOWN, (uint)Inputs.INPUT_DOWN | (uint)Inputs.INPUT_FORWARD, (uint)Inputs.INPUT_FORWARD };
+        public static readonly uint[] HADOUKEN = { (uint)Inputs.INPUT_DOWN, (uint)Inputs.INPUT_DOWN | (uint)Inputs.INPUT_FORWARD, (uint)Inputs.INPUT_FORWARD, (uint) Inputs.INPUT_nMP, (uint) Inputs.INPUT_MP };
         public static readonly uint[] QCB = { (uint)Inputs.INPUT_DOWN, (uint)Inputs.INPUT_DOWN | (uint)Inputs.INPUT_BACK, (uint)Inputs.INPUT_BACK };
         public static readonly uint[] DOUBLE_QCF = { (uint)Inputs.INPUT_DOWN, (uint)Inputs.INPUT_DOWN | (uint)Inputs.INPUT_FORWARD, (uint)Inputs.INPUT_FORWARD, (uint)Inputs.INPUT_DOWN, (uint)Inputs.INPUT_DOWN | (uint)Inputs.INPUT_FORWARD, (uint)Inputs.INPUT_FORWARD };
         public static readonly uint[] DP = { (uint)Inputs.INPUT_FORWARD, (uint)Inputs.INPUT_DOWN, (uint)Inputs.INPUT_DOWN | (uint)Inputs.INPUT_FORWARD };
@@ -120,25 +121,26 @@ namespace HitstunConstants
     public enum CharacterState
     {
         // animations
-        IDLE = 0,
-        CROUCH = 1,
-        WALK_FORWARD = 2,
-        WALK_BACKWARD = 3,
-        STAND_TO_CROUCH = 4,
-        CROUCH_TO_STAND = 5,
-        JUMP_NEUTRAL = 6,
-        JUMP_FORWARD = 7,
-        JUMP_BACKWARD = 8,
-        DASH_FORWARD = 9,
-        DASH_BACKWARD = 10,
-        BlOCK_HIGH = 11,
-        BLOCK_STAND = 12,
-        BLOCK_LOW = 13,
-        HIT_STAND = 14,
-        HIT_CROUCH = 15,
+        STAND = 0,
+        CROUCH,
+        WALK_FORWARD,
+        WALK_BACKWARD,
+        STAND_TO_CROUCH,
+        CROUCH_TO_STAND,
+        JUMP_NEUTRAL,
+        JUMP_FORWARD,
+        JUMP_BACKWARD,
+        DASH_FORWARD,
+        DASH_BACKWARD,
+        BlOCK_HIGH,
+        BLOCK_STAND,
+        BLOCK_LOW,
+        HIT_STAND,
+        HIT_CROUCH,
 
         // attacks
-        CROUCH_MK = 16
+        CROUCH_MK,
+        HADOUKEN
     }
 }
 

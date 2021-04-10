@@ -6,8 +6,8 @@
     "JUMP_VELOCITY_X" : 2400
   },
   "animations": {
-    "IDLE": {
-      "animationName": "IDLE",
+    "STAND": {
+      "animationName": "STAND",
       "distinctSprites": 10,
       "totalFrames": 34,
       "frameDuration": [3, 3, 4, 4, 4, 4, 3, 3, 3, 3],
@@ -359,6 +359,17 @@
         "24": [[-320, 330, 0, 600],[-270,130,600,740]],
         "25": [[-320, 330, 0, 600],[-270,130,600,740]],
         "26": [[-320, 330, 0, 600],[-270,130,600,740]]
+      }
+    },
+    "HADOUKEN": {
+      "animationName": "HADOUKEN",
+      "distinctSprites": 12,
+      "totalFrames": 50,
+      "frameDuration": [3,3,3,3,2,2,4,5,7,12,3,3],
+      "collisionBox": [-250, 250, 0, 800],
+      "staticHurtbox": true,
+      "hurtBoxes": {
+        "0": [[-300, 300, 0, 1100]]
       }
     }
   }
