@@ -149,6 +149,7 @@ MonoBehaviour:
   spriteRenderer: {fileID: 2701401691977234171}
   shadowProjector: {fileID: 8704955755935823504}
   hitboxPrefab: {fileID: 5892596670726627445, guid: 08c9d9f4c3d94654e890701508dcb7ed, type: 3}
+  projectilePrefab: {fileID: -8276493982334664000, guid: 68c8fa1035433cd488072a3178b6e0c9, type: 3}
   zDistance: 2
   shadowSize: 0.5
   shadowOffset: -0.03

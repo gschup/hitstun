@@ -10,11 +10,13 @@ public class CharacterData
     public Params constants;
     public Dictionary<string, Animation> animations;
     public Dictionary<string, Attack> attacks;
+    public Dictionary<string, ProjectileData> projectiles;
 
     public CharacterData()
     {
         animations = new Dictionary<string, Animation>();
         attacks = new Dictionary<string, Attack>();
+        projectiles = new Dictionary<string, ProjectileData>();
     }
 }
 
@@ -38,6 +40,8 @@ public class Animation
 public class Attack : Animation
 {
     public HitBox[] hitBoxes;
+    public uint[] specialCancelWindow;
+    public uint spawnsProjectileAt;
 }
 
 
@@ -210,4 +214,82 @@ public class HitBox : Box
         hitstop = br.ReadUInt32();
         pushback = br.ReadInt32();
     }
+}
+
+[Serializable]
+public class Projectile {
+
+    public Vector2Int position;
+    public Vector2Int velocity;
+    public uint activeSince;
+    public bool facingRight;
+    public bool active;
+    public HitBox hitBox;
+
+    public Projectile() 
+    {
+        active = false;
+        hitBox = new HitBox(-25,25,-100,100);
+        hitBox.hitstop = 3;
+        hitBox.type = HitBoxType.MID;
+        hitBox.pushback = 4000;
+        hitBox.blockstun = 15;
+        hitBox.hitstun = 15;
+        hitBox.used = false;
+
+    }
+
+    public Projectile(Projectile copy) 
+    {
+        position.x = copy.position.x;
+        position.y = copy.position.y;
+        velocity.x = copy.velocity.x;
+        velocity.y = copy.velocity.y;
+        activeSince = copy.activeSince;
+        facingRight = copy.facingRight;
+        active = copy.active;
+    }
+
+    public void Serialize(BinaryWriter bw)
+    {
+        // position
+        bw.Write(position.x);
+        bw.Write(position.y);
+        // velocity
+        bw.Write(velocity.x);
+        bw.Write(velocity.y);
+        // age in frames
+        bw.Write(activeSince);
+        // boolean
+        bw.Write(facingRight);
+        bw.Write(active);
+        //hitbox
+        hitBox.Serialize(bw);
+    }
+
+    public void Deserialize(BinaryReader br)
+    {
+        // position
+        position.x = br.ReadInt32();
+        position.y = br.ReadInt32();
+        // velocity
+        velocity.x = br.ReadInt32();
+        velocity.y = br.ReadInt32();
+        // age in frames
+        activeSince = br.ReadUInt32();
+        // booleans
+        facingRight = br.ReadBoolean();
+        active = br.ReadBoolean();
+        //hitbox
+        hitBox = new HitBox();
+        hitBox.Deserialize(br);
+    }
+}
+
+[Serializable]
+public class ProjectileData {
+    public string animationName;
+    public int distinctSprites;
+    public int totalFrames;
+    public int dx;
 }

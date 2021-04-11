@@ -47,6 +47,9 @@ TagManager:
   - name: PLAYER_TOP
     uniqueID: 1537865031
     locked: 0
+  - name: PROJECTILE
+    uniqueID: 1430987947
+    locked: 0
   - name: HURTBOX
     uniqueID: 496760745
     locked: 0

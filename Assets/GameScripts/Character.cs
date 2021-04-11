@@ -14,6 +14,7 @@ public class Character
     public uint blockStun;
     public uint hitStun;
     public List<HitBox> hitBoxes;
+    public Projectile projectile;
 
     // Input Buffer
     private uint[] inputBuffer;
@@ -36,6 +37,8 @@ public class Character
         }
         // hitboxes list
         hitBoxes = new List<HitBox>();
+        // projectile
+        projectile = new Projectile();
     }
 
     public void Serialize(BinaryWriter bw)
@@ -66,6 +69,8 @@ public class Character
         {
             hitBox.Serialize(bw);
         }
+        //projectile
+        projectile.Serialize(bw);
     }
 
     public void Deserialize(BinaryReader br)
@@ -99,9 +104,12 @@ public class Character
             hitBoxes.Add(hitbox);
             hitbox.Deserialize(br);
         }
+        //projectile
+        projectile = new Projectile();
+        projectile.Deserialize(br);
     }
 
-    public void AddInputsToBuffer(uint inputs)
+    public void ParseInputsToBuffer(uint inputs)
     {
         uint sanitizedInputs = inputs;
         // if up+down, register none of them
@@ -362,6 +370,20 @@ public class Character
         {
             hitBox.enabled = hitBox.startingFrame <= framesInState && hitBox.startingFrame + hitBox.duration >= framesInState;
         }
+        // update projectiles
+        if (projectile.active) {
+            projectile.activeSince++;
+            // if out of bounds, deactivate
+            if (projectile.position.x - 2000 > Constants.BOUNDS_WIDTH || projectile.position.x < -2000 || projectile.position.y > Constants.BOUNDS_HEIGHT || projectile.position.y < 0)
+            {
+                projectile.active = false;
+            }
+            // if too far away from character, deactivate
+            if (Mathf.Abs(projectile.position.x - position.x)  - 2000> Constants.MAX_CHARACTER_DISTANCE)
+            {
+                projectile.active = false;
+            }
+        }
 
         switch (state)
         {
@@ -549,7 +571,6 @@ public class Character
                 }
                 velocity.x += facingRight ? Constants.FRICTION : -Constants.FRICTION;
                 velocity.x = facingRight ? Mathf.Min(velocity.x, 0) : Mathf.Max(velocity.x, 0);
-                velocity.y = velocity.y;
                 break;
             // HIT_CROUCH STATE
             case CharacterState.HIT_CROUCH:
@@ -568,13 +589,14 @@ public class Character
                 }
                 velocity.x += facingRight ? Constants.FRICTION : -Constants.FRICTION;
                 velocity.x = facingRight ? Mathf.Min(velocity.x, 0) : Mathf.Max(velocity.x, 0);
-                velocity.y = velocity.y;
                 break;
             // CROUCH_MK STATE
             case CharacterState.CROUCH_MK:
                 velocity.x += facingRight ? Constants.FRICTION : -Constants.FRICTION;
                 velocity.x = facingRight ? Mathf.Min(velocity.x, 0) : Mathf.Max(velocity.x, 0);
                 // check for cancels
+                if (CheckSpecialCancel(data)) break;
+                // end state
                 if (framesInState >= data.attacks[state.ToString()].totalFrames - 1)
                 {
                     SetCharacterState(CharacterState.CROUCH);
@@ -585,6 +607,18 @@ public class Character
                 velocity.x += facingRight ? Constants.FRICTION : -Constants.FRICTION;
                 velocity.x = facingRight ? Mathf.Min(velocity.x, 0) : Mathf.Max(velocity.x, 0);
                 // check for cancels
+                // spawn projectile
+                if (framesInState == data.attacks[state.ToString()].spawnsProjectileAt && !projectile.active)
+                {
+                    projectile.active = true;
+                    projectile.activeSince = 0;
+                    projectile.facingRight = facingRight;
+                    projectile.position.x = facingRight ? position.x + Constants.PROJECTILE_DISPLACE : position.x - Constants.PROJECTILE_DISPLACE;
+                    projectile.position.y = Constants.PROJECTILE_HEIGHT;
+                    projectile.velocity.x = facingRight ? data.projectiles["FIREBALL"].dx : -data.projectiles["FIREBALL"].dx;
+                    projectile.velocity.y = 0;
+                }
+                // end state
                 if (framesInState >= data.attacks[state.ToString()].totalFrames - 1)
                 {
                     SetCharacterState(CharacterState.STAND);
@@ -600,29 +634,28 @@ public class Character
 
     public bool CheckGroundedSpecials(CharacterData data)
     {
-        if (CheckSequence(Motions.DOUBLE_QCF, Constants.LENIENCY_DOUBLE_QF))
-        {
-            FlushBuffer();
-            Debug.Log("DOUBLE_QCF");
-            return true;
-        }
-        if (CheckSequence(Motions.DP, Constants.LENIENCY_DP))
-        {
-            FlushBuffer();
-            Debug.Log("DP");
-            return true;
-        }
-        if (CheckSequence(Motions.QCB, Constants.LENIENCY_QF))
-        {
-            FlushBuffer();
-            Debug.Log("QCB");
-            return true;
-        }
-        if (CheckSequence(Motions.HADOUKEN, Constants.LENIENCY_QF))
+        if (CheckSequence(Motions.QCF, Constants.LENIENCY_QF) && CheckSequence(new uint[] { (uint)Inputs.INPUT_nMP, (uint)Inputs.INPUT_MP }, 3) && !projectile.active)
         {
             FlushBuffer();
             SetCharacterState(CharacterState.HADOUKEN);
             return true;
+        }
+        return false;
+    }
+
+    public bool CheckSpecialCancel(CharacterData data)
+    {   
+        // only cancel from block or hit
+        int isBlockOrHit = hitBoxes.FindIndex(hitbox => hitbox.used);
+        if (isBlockOrHit >= 0) 
+        {   
+            // only cancel in window
+            uint lowerWindow = data.attacks[state.ToString()].specialCancelWindow[0] - Constants.LENIENCY_CANCEL;
+            uint upperWindow = data.attacks[state.ToString()].specialCancelWindow[1] + Constants.LENIENCY_CANCEL;
+            if (framesInState >= lowerWindow && framesInState <= upperWindow)
+            {
+                return CheckGroundedSpecials(data);
+            }
         }
         return false;
     }

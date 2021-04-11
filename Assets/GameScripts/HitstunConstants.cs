@@ -28,6 +28,7 @@ namespace HitstunConstants
         public const int LENIENCY_QF = 10;
         public const int LENIENCY_DP = 15;
         public const int LENIENCY_DOUBLE_QF = 20;
+        public const int LENIENCY_CANCEL = 5;
 
         // Jump parameters
         public const int PREJUMP_FRAMES = 3;
@@ -39,6 +40,10 @@ namespace HitstunConstants
         // pushback
         public const int FRICTION = 300;
         public const int PUSHBACK_CORNER_THRESH = 100;
+
+        // projectile properties
+        public const int PROJECTILE_HEIGHT = 720;
+        public const int PROJECTILE_DISPLACE = 600;
     }
 
     public static class Motions
@@ -46,7 +51,6 @@ namespace HitstunConstants
         public static readonly uint[] DASH_FORWARD = { (uint)Inputs.INPUT_FORWARD, (uint)Inputs.INPUT_NEUTRAL, (uint)Inputs.INPUT_FORWARD };
         public static readonly uint[] DASH_BACKWARD = { (uint)Inputs.INPUT_BACK, (uint)Inputs.INPUT_NEUTRAL, (uint)Inputs.INPUT_BACK };
         public static readonly uint[] QCF = { (uint)Inputs.INPUT_DOWN, (uint)Inputs.INPUT_DOWN | (uint)Inputs.INPUT_FORWARD, (uint)Inputs.INPUT_FORWARD };
-        public static readonly uint[] HADOUKEN = { (uint)Inputs.INPUT_DOWN, (uint)Inputs.INPUT_DOWN | (uint)Inputs.INPUT_FORWARD, (uint)Inputs.INPUT_FORWARD, (uint) Inputs.INPUT_nMP, (uint) Inputs.INPUT_MP };
         public static readonly uint[] QCB = { (uint)Inputs.INPUT_DOWN, (uint)Inputs.INPUT_DOWN | (uint)Inputs.INPUT_BACK, (uint)Inputs.INPUT_BACK };
         public static readonly uint[] DOUBLE_QCF = { (uint)Inputs.INPUT_DOWN, (uint)Inputs.INPUT_DOWN | (uint)Inputs.INPUT_FORWARD, (uint)Inputs.INPUT_FORWARD, (uint)Inputs.INPUT_DOWN, (uint)Inputs.INPUT_DOWN | (uint)Inputs.INPUT_FORWARD, (uint)Inputs.INPUT_FORWARD };
         public static readonly uint[] DP = { (uint)Inputs.INPUT_FORWARD, (uint)Inputs.INPUT_DOWN, (uint)Inputs.INPUT_DOWN | (uint)Inputs.INPUT_FORWARD };

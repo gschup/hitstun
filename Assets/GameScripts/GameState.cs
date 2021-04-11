@@ -92,11 +92,11 @@ public class GameState
         {
             if ((disconnect_flags & (1 << i)) != 0)
             {
-                characters[i].AddInputsToBuffer(0);
+                characters[i].ParseInputsToBuffer(0);
             }
             else
             {
-                characters[i].AddInputsToBuffer(inputs[i]);
+                characters[i].ParseInputsToBuffer(inputs[i]);
             }
         }
 
@@ -118,6 +118,14 @@ public class GameState
         {
             characters[i].position.x += characters[i].velocity.x / Constants.FPS;
             characters[i].position.y += characters[i].velocity.y / Constants.FPS;
+
+            // apply projectile velocity
+            if (characters[i].projectile.active)
+            {
+                characters[i].projectile.position.x += characters[i].projectile.velocity.x / Constants.FPS;
+                characters[i].projectile.position.y += characters[i].projectile.velocity.y / Constants.FPS;
+                Debug.Log(characters[i].projectile.position.x.ToString() + " , " + characters[i].projectile.position.y.ToString());
+            }
         }
 
         // interactions between characters
@@ -238,6 +246,31 @@ public class GameState
                             applicableHitboxes[i] = absoluteHitBox;
                             break;
                         }
+                    }
+                }
+            }
+            //check projectile
+            if (thisChar.projectile.active && otherchar.GetHurtBoxes(otherData, out hurtBoxes))
+            {
+                // displace the hurtboxes from relative coordinates to absolute coordinates
+                foreach (Box hurtBox in hurtBoxes)
+                {
+                    hurtBox.Displace(otherchar.position.x, otherchar.position.y, otherchar.facingRight);
+                }
+
+                HitBox absoluteHitBox = new HitBox(thisChar.projectile.hitBox);
+                absoluteHitBox.Displace(thisChar.projectile.position.x, thisChar.projectile.position.y, thisChar.projectile.facingRight);
+
+                foreach (Box hurtBox in hurtBoxes)
+                {
+                    Box overlap;
+                    if (absoluteHitBox.GetOverlap(hurtBox, out overlap))
+                    {
+                        thisChar.onTop = true;
+                        otherchar.onTop = false;
+                        thisChar.projectile.active = false;
+                        applicableHitboxes[i] = absoluteHitBox;
+                        break;
                     }
                 }
             }
