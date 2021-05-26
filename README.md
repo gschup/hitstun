@@ -13,3 +13,8 @@ a Unity 2D fighting game with 3D environment, fully deterministic in order to be
 you can cancel cr.MK xx fireball to make a combo
 
 player 2 movement on arrow keys
+
+# dev controls
+- F1: toggle hurt/hitboxes
+- F2: toggle manual mode. advance frames manually with F3
+- F3: advance a single frame in manual mode
