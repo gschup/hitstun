@@ -1,5 +1,5 @@
 # hitstun
-a Unity 2D fighting game with 3D environment, fully compatible with GGPO. The project does not run without sprites. 
+a Unity 2D fighting game with 3D environment, fully deterministic in order to be compatible with rollback netcode. The project does not run without sprites. 
 
 
 # controls
