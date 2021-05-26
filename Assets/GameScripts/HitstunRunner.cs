@@ -1,4 +1,5 @@
 using System.IO;
+using System.Collections.Generic;
 using Unity.Collections;
 using UnityEngine;
 using Newtonsoft.Json;
@@ -23,8 +24,21 @@ public class HitstunRunner : MonoBehaviour
 
     // Internal
     NativeArray<byte> buffer;
+    NativeArray<byte> oldBuffer;
     private bool running;
     private bool nextStep;
+
+    public static int CalcFletcher32(NativeArray<byte> data) {
+        uint sum1 = 0;
+        uint sum2 = 0;
+
+        int index;
+        for (index = 0; index < data.Length; ++index) {
+            sum1 = (sum1 + data[index]) % 0xffff;
+            sum2 = (sum2 + sum1) % 0xffff;
+        }
+        return unchecked((int)((sum2 << 16) | sum1));
+    }
 
     void Start()
     {   
@@ -51,7 +65,8 @@ public class HitstunRunner : MonoBehaviour
         LoadCharacterData();
         // Init View
         InitView(LocalSession.gs);
-        running = true;
+        running = !manualStep;
+        nextStep = false;
     }
 
     void FixedUpdate() {
@@ -62,10 +77,45 @@ public class HitstunRunner : MonoBehaviour
         // handles function key debugging inputs
         HandleDevKeys();
         if (running || nextStep)
-        {
-            LocalSession.RunFrame();
-            UpdateGameView(LocalSession.gs, LocalSession.ngs);
+        {   
             nextStep = false;
+
+            // save old gamestate
+            if (oldBuffer.IsCreated)
+            {
+                oldBuffer.Dispose();
+            }
+            oldBuffer = GameState.ToBytes(LocalSession.gs);
+
+            // run the frame
+            uint[] inputs = LocalSession.RunFrame();
+            
+            // save new gamestate
+            if (buffer.IsCreated)
+            {
+                buffer.Dispose();
+            }
+            buffer = GameState.ToBytes(LocalSession.gs);
+            int checksum = CalcFletcher32(buffer);
+
+            // load old gamestate and re-simulate
+            GameState.FromBytes(LocalSession.gs, oldBuffer);
+            LocalSession.gs.Update(inputs, 0);
+
+            // save new gamestate again
+            if (buffer.IsCreated)
+            {
+                buffer.Dispose();
+            }
+            buffer = GameState.ToBytes(LocalSession.gs);
+            int checksum2 = CalcFletcher32(buffer);
+
+            if (checksum != checksum2)
+            {
+                Debug.Log(checksum.ToString() + " , " +checksum2.ToString());
+            }       
+            
+            UpdateGameView(LocalSession.gs, LocalSession.ngs);
         }
     }
 
@@ -174,6 +224,10 @@ public class HitstunRunner : MonoBehaviour
         if (buffer.IsCreated)
         {
             buffer.Dispose();
+        }
+        if (oldBuffer.IsCreated)
+        {
+            oldBuffer.Dispose();
         }
     }
 

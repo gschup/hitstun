@@ -124,7 +124,6 @@ public class GameState
             {
                 characters[i].projectile.position.x += characters[i].projectile.velocity.x / Constants.FPS;
                 characters[i].projectile.position.y += characters[i].projectile.velocity.y / Constants.FPS;
-                Debug.Log(characters[i].projectile.position.x.ToString() + " , " + characters[i].projectile.position.y.ToString());
             }
         }
 

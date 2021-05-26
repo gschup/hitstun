@@ -14,18 +14,15 @@ public static class LocalSession
         ngs = _ngs;
     }
 
-    public static void Idle(int ms)
+    public static uint[] RunFrame()
     {
-    }
-
-    public static void RunFrame()
-    {
-        var inputs = new uint[ngs.players.Length];
+        uint[] inputs = new uint[ngs.players.Length];
         for (int i = 0; i < inputs.Length; ++i)
         {
             inputs[i] = ReadInputs(ngs.players[i].controllerId);
         }
         gs.Update(inputs, 0);
+        return inputs;
     }
 
     public static uint ReadInputs(int controllerId)
